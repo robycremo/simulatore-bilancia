@@ -1,0 +1,22 @@
+# dipendenze
+node_modules/
+
+# build
+client/dist/
+
+# dati di runtime (setup, progressivo, totali, archivio MPP, log)
+data/
+*.log
+logs/
+
+# segreti e configurazioni locali
+.env
+.env.*
+.claude/settings.local.json
+
+# sistema / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Percorso intent → spec → plan → codice
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            npm run check:flow -- --base origin/${{ github.base_ref }}
+          else
+            npm run check:flow
+          fi
+
+      # La build precede i test: i test su intestazioni e cache servono la UI compilata.
+      - run: npm run build
+
+      - run: npm test
+
+      - name: Vulnerabilità delle dipendenze (gravità high o superiore)
+        run: npm audit --audit-level=high
