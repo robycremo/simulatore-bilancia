@@ -18,7 +18,7 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 |---|---|---|
 | **Modalità e connessioni** | | |
 | PC in TCP server su 4001, pesata a soglia → il client riceve la stringa di 104 caratteri identica a quella del log | `app.test` › pesata STD con PC in TCP server; manuale nel browser con un client TCP grezzo su `127.0.0.1:4001`: ricevuti 104 caratteri, uguali alla stringa della scheda Trasmissioni | ✅ |
-| … con PuTTY *Raw* | manuale (utente) | ⏳ |
+| … con PuTTY *Raw* | manuale (utente): PuTTY su questo PC (log: connessioni da 127.0.0.1 alle 15:18, 15:23 e 15:27 UTC), stringa ricevuta | ✅ |
 | Client collegato dopo una pesata riceve solo le successive | `serverChannel.test` | ✅ |
 | Due client ricevono la stringa; il sesto viene disconnesso | `serverChannel.test` | ✅ |
 | Testo scritto dal client non cambia lo stato né causa errori | `serverChannel.test` (20 KB di testo dal client) · PuTTY manuale | ✅ · ⏳ |
@@ -32,7 +32,7 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 | Fine partita → stringa al client; senza client operazione completata | `app.test` | ✅ |
 | MPP senza client → contatto `ERRORE TRASM PC` circa 1 s | stesso percorso d'esito di STD (`NESSUN CLIENT` = errore) già coperto; revisione di `executeMpp` | ✅ |
 | **Accesso** | | |
-| Accesso `solo questo PC` → connessione dall'IP di rete rifiutata | `serverChannel.test` (porta non raggiungibile dall'IP di rete) | ✅ |
+| Accesso `solo questo PC` → connessione dall'IP di rete rifiutata, nessuna riga nel log (criterio corretto, vedi *Problemi* § 2) | `serverChannel.test` (rifiuto e assenza di `server_client_refused`); prova dell'utente da un secondo PC: "connection refused" | ✅ |
 | Accesso `rete`: IP ammesso accettato; IP non in elenco rifiutato e registrato | `serverChannel.test` (IP di rete del PC) · PuTTY da un secondo PC | ✅ · ⏳ |
 | Accesso `rete` con elenco vuoto o IP non valido → setup rifiutato | `validate.test`; manuale nel browser: notifica "con accesso "rete" serve almeno un IP ammesso" | ✅ |
 | **Visibilità** | | |
@@ -68,6 +68,13 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 1. **Rifiuto lento su Windows** (T4). Una connessione verso una porta non in ascolto sul proprio IP di rete viene
    ritentata dal sistema per circa 2 s prima del rifiuto: il test con attesa di 2 s falliva. Comportamento del canale
    corretto (0 client); attesa del test portata a 6 s.
+2. **Criterio della spec in contrasto con TR-6** (T13), trovato nella prova dell'utente. Con accesso "solo questo PC"
+   il canale ascolta su `127.0.0.1`: da un altro PC si ottiene "connection refused" dal sistema operativo e nel log
+   non resta nulla, mentre la spec chiedeva il rifiuto *registrato*. Il test controllava il rifiuto ma non il log.
+   **Ritorno alla spec** (scelta dell'utente, opzione A): il criterio ora dice che in accesso locale il rifiuto non è
+   registrato; il rifiuto registrato vale per l'accesso "rete" con IP non in elenco. TR-6 invariato; il test verifica
+   anche l'assenza della riga di log. Dalla stessa prova: l'accesso alla porta del canale è indipendente da `HOST`
+   (che apre solo l'interfaccia web), da chiarire nel README (T14).
 
 ## Registro
 

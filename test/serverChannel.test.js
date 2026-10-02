@@ -118,6 +118,8 @@ describe('ascolto e accettazione (T4)', () => {
     const c = client(ch.port, { host: lan });
     assert.ok(await waitUntil(() => c.closed, 6000));
     assert.equal(ch.clients.size, 0);
+    // Spec § 5: il rifiuto lo fa il sistema operativo, il simulatore non vede la connessione e non la registra.
+    assert.equal(ch.log.events().includes('server_client_refused'), false);
   });
 
   test('accesso rete: IP ammesso accettato, IP non in elenco rifiutato e registrato', { skip: !lan && 'nessuna interfaccia di rete' }, async () => {
