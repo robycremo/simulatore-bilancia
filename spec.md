@@ -27,7 +27,7 @@
 | 4 | Totalizza solo con trasmissione FOM corretta | sì / no (opz.) |
 | 5 | Progressivo a 1 dopo fine partita | sì / no (opz.) |
 | 6 | Controlli stampante prima della stampa | sì / no (dopo la stampa vengono fatti sempre) |
-| 7 | Stringhe a PC e a FOM | ogni canale abilitabile, IP, porta, TCP/UDP, ACK/NAK, time-out, tentativi |
+| 7 | Stringhe a PC e a FOM | ogni canale abilitabile, protocollo **TCP client / UDP / TCP server**, IP, porta, ACK/NAK, time-out, tentativi; in TCP server *accesso* (solo questo PC / rete) e *IP ammessi* |
 | 8 | Uscite errore trasmissione FOM / PC | sì / no (opz.) |
 | 9 | Input di fine partita | sì / no (opz.) |
 | 10 | Stampante | presente, nastro / cartellino, stampa ridotta |
@@ -99,14 +99,31 @@ Modelli configurabili con i campi `{data} {ora} {prog} {codice} {desc} {cgen} {r
 
 ### Protocollo
 
-- TCP client (connessione per stringa) o UDP.
+- **TCP client**: il simulatore apre una connessione verso *IP:porta* per ogni stringa.
+- **UDP**: un datagramma per stringa.
+- **TCP server** (change 0003): il simulatore ascolta sulla *porta* (proposte 4001 per PC e 4002 per FOM) e invia ogni
+  stringa a tutti i client collegati, fino a 5 per canale (il sesto viene disconnesso). I client ricevono solo le
+  stringhe successive al collegamento, senza altri caratteri; i dati che inviano vengono ignorati, tranne ACK/NAK.
+  - Esito: nessun client → errore `NESSUN CLIENT`; senza ACK/NAK corretto se almeno un client ha ricevuto la stringa;
+    con ACK/NAK vale il primo ACK, altrimenti nuovi invii fino a *tentativi*, poi `NAK` o `TIMEOUT ACK`.
+    L'esito decide uscite di errore e totalizzazione come nelle altre modalità.
+  - Accesso *solo questo PC* (default): la porta non è raggiungibile dalla rete; da un altro PC si ottiene
+    "connection refused" e nel log non resta nulla.
+  - Accesso *rete*: solo gli IP dell'elenco *IP ammessi* (obbligatorio, al massimo 20); un IP non in elenco viene
+    chiuso subito e registrato nel log.
+  - L'accesso alla porta del canale è indipendente da `HOST`, che riguarda solo l'interfaccia web.
+  - Porta occupata: errore visibile e nuovo tentativo ogni 5 s; cambio di porta o accesso nel setup: il canale riparte
+    e i client vengono disconnessi.
 - ACK/NAK: `06h` = ricevuto, `15h` = errore; ritrasmissione su NAK o mancata risposta fino a *tentativi*.
 
 ## 7. Strumenti di collaudo
 
 - Due ricevitori integrati (PC 9100, FOM 9101) con risposta ACK / NAK / nessuna, modificabile a caldo.
-- Log delle stringhe trasmesse e ricevute con caratteri di controllo visibili.
+- Log delle stringhe trasmesse e ricevute con caratteri di controllo visibili; per i canali in TCP server anche il
+  numero di client raggiunti.
 - Ricevitore da riga di comando `npm run listen -- <porta> <tcp|udp> <ack|nak|none>`.
+- Con un canale in TCP server: **PuTTY** (o un altro terminale TCP) in modalità *Raw* sulla porta del canale. Display
+  e setup mostrano quanti client sono collegati.
 
 ## 8. Stack
 
@@ -119,16 +136,16 @@ Le misure sono in [tech-requirements.md](tech-requirements.md); l'analisi è nel
 | Frontend | React + Vite; UI del terminale, setup, log; tasti rapidi F2–F8. Un errore di rendering mostra un pannello con **Ricarica** e viene registrato nel log; i comandi rifiutati dal server compaiono come notifica |
 | APIs & backend logic | WebSocket `/ws` per stato (10 Hz) e comandi; solo comandi noti con argomenti validi, gli altri vengono rifiutati con un errore senza toccare lo stato; `GET /api/health` |
 | Database & storage | file JSON in `data/`, salvati in modo atomico con copia `.bak`; file danneggiati rinominati e recuperati all'avvio. Nessun database: i volumi non lo giustificano |
-| Auth & permissions | di default solo dal PC locale; dalla rete solo con `SIM_TOKEN`, chiesto dalla UI una volta per sessione. Nessun utente o ruolo |
+| Auth & permissions | di default solo dal PC locale; dalla rete solo con `SIM_TOKEN`, chiesto dalla UI una volta per sessione. Porte dei canali in TCP server: solo locale, oppure dalla rete con un elenco di IP ammessi (costituzione § 2). Nessun utente o ruolo |
 | Hosting & deployment | `npm run prod` sul PC di collaudo; procedura nel README |
 | Cloud & compute | non applicabile: il simulatore deve stare nella rete dei software da collaudare |
 | CI/CD & version control | git + GitHub Actions: verifica del percorso, test, build, controllo delle vulnerabilità |
 | Security & RLS | origine del WebSocket controllata, intestazioni di sicurezza e CSP, limite di dimensione dei messaggi. RLS non applicabile (nessun database) |
-| Rate limiting | al massimo 50 comandi al secondo per connessione, chiusura dopo 10 s di abuso, al massimo 10 connessioni |
+| Rate limiting | al massimo 50 comandi al secondo per connessione, chiusura dopo 10 s di abuso, al massimo 10 connessioni; canali in TCP server: al massimo 5 client, dati in arrivo scartati, client che non leggono disconnessi |
 | Caching & CDN | file della UI con cache lunga e immutabile, `index.html` sempre rivalidato. CDN non applicabile |
 | Load balancing & scaling | non applicabile: istanza singola con stato; una seconda istanza sulla stessa porta termina con un messaggio chiaro |
 | Error tracking & logs | log JSON giornalieri in `data/logs/`, conservati 14 giorni: pesate, errori di trasmissione e stampa, accessi negati, errori della UI ed errori non gestiti |
-| Availability & recovery | stato persistente; arresto pulito entro 3 s; ricevitori di test che ripartono da soli; riconnessione automatica della UI |
+| Availability & recovery | stato persistente; arresto pulito entro 3 s; ricevitori di test e canali in TCP server che ripartono da soli se la porta era occupata; client caduti rimossi; riconnessione automatica della UI |
 
 ## 9. Operatività
 
@@ -137,7 +154,7 @@ Le misure sono in [tech-requirements.md](tech-requirements.md); l'analisi è nel
 | Variabile | Default | Significato |
 |---|---|---|
 | `PORT` | `3000` | porta HTTP/WebSocket |
-| `HOST` | `127.0.0.1` | interfaccia di ascolto; `0.0.0.0` per l'accesso da altri PC |
+| `HOST` | `127.0.0.1` | interfaccia di ascolto dell'interfaccia web; `0.0.0.0` per l'accesso da altri PC. Non riguarda le porte dei canali in TCP server, che hanno l'impostazione *Accesso* nel setup |
 | `SIM_TOKEN` | — | token di accesso, obbligatorio se `HOST` non è un indirizzo di loopback |
 
 Configurazione non valida o porta occupata → messaggio leggibile e codice di uscita 1. Procedura completa nel README,
@@ -150,11 +167,14 @@ della connessione (codice 4401) ed evento `auth_denied` nel log.
 
 ### Salute
 
-`GET /api/health` → `status`, `version`, `uptime`, fase del ciclo, modo STD/MPP, stato dei ricevitori di test.
+`GET /api/health` → `status`, `version`, `uptime`, fase del ciclo, modo STD/MPP, stato dei ricevitori di test e, per i
+canali in TCP server, `mode`, `listening`, `port`, `access`, `clients`.
 
 ### Log
 
 `data/logs/simulatore-AAAA-MM-GG.log`, una riga JSON per evento (`ts`, `level`, `event` e campi). Eventi principali:
 `start`, `shutdown`, `weighing`, `tx_error`, `printer_fault`, `end_batch`, `config_updated`,
 `storage_recovered`, `receiver_error`, `receiver_retry`, `ws_connect`, `ws_disconnect`,
-`command_rejected`, `rate_limited`, `auth_denied`, `client_error`, `uncaught_exception`.
+`command_rejected`, `rate_limited`, `auth_denied`, `client_error`, `uncaught_exception`; canali in TCP server:
+`server_listen`, `server_listen_error`, `server_client_connect`, `server_client_disconnect`, `server_client_refused`
+(motivo `ip` o `max_clients`).

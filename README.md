@@ -17,8 +17,8 @@ Aprire http://localhost:3000. In sviluppo: `npm run dev` (UI su http://localhost
 ### Requisiti
 
 - Windows 10/11 (o Linux), **Node.js 22 o successivo** (https://nodejs.org, versione LTS).
-- Porte libere: **3000** (interfaccia), **9100** e **9101** (ricevitori di test PC e FOM), più quelle dei sistemi da
-  collaudare indicate nel setup.
+- Porte libere: **3000** (interfaccia), **9100** e **9101** (ricevitori di test PC e FOM), **4001**/**4002** se i
+  canali sono in modalità TCP server, più quelle dei sistemi da collaudare indicate nel setup.
 
 ### Installazione
 
@@ -50,7 +50,7 @@ Messaggi all'avvio:
 | Variabile | Default | Significato |
 |---|---|---|
 | `PORT` | `3000` | porta dell'interfaccia |
-| `HOST` | `127.0.0.1` | interfaccia di ascolto; `0.0.0.0` per l'accesso da altri PC |
+| `HOST` | `127.0.0.1` | interfaccia di ascolto della **pagina web**; `0.0.0.0` per aprirla da altri PC. Non riguarda le porte dei canali in TCP server (vedi *Uso con PuTTY*) |
 | `SIM_TOKEN` | — | token di accesso, **obbligatorio** se `HOST` non è locale |
 
 In PowerShell valgono per il terminale in cui vengono impostate:
@@ -95,6 +95,37 @@ npm run listen -- 9100 tcp ack
 
 Argomenti: porta, `tcp` o `udp`, risposta `ack`, `nak` o `none`.
 
+### Uso con PuTTY (modalità TCP server)
+
+Di default il simulatore apre lui la connessione verso PC e FOM (TCP client). Per collegarsi **al** simulatore con
+PuTTY o con un software che si aspetta una bilancia in ascolto, il canale va messo in modalità **TCP server**:
+
+1. **Setup** → *7) Trasmissione a PC* (o FOM) → *Protocollo* = **TCP server**. Viene proposta la porta **4001**
+   (PC) o **4002** (FOM); *Salva setup*. Lo stato del canale deve diventare `IN ASCOLTO TCP 4001`.
+2. In PuTTY: *Host Name* `127.0.0.1`, *Port* `4001`, *Connection type* **Raw** → *Open*.
+3. A ogni pesata PuTTY mostra la stringa (104 caratteri, 106 con checksum, terminata da CR). Sul display compare
+   `PC: 1 client`.
+
+Comportamento:
+- fino a **5 client** per canale ricevono tutti le stesse stringhe; ciascuno riceve solo quelle successive al
+  collegamento;
+- quello che si scrive in PuTTY viene ignorato (salvo i caratteri ACK/NAK se il protocollo ACK/NAK è attivo);
+- **nessun client collegato** = trasmissione fallita (`NESSUN CLIENT`): uscita di errore e, per il FOM con
+  *totalizza solo con FOM corretta*, pesata non totalizzata, come per un PC irraggiungibile.
+
+**Da un altro PC.** Con *Accesso* = "solo questo PC" (default) la porta non è raggiungibile dalla rete: PuTTY da un
+altro PC riceve **"connection refused"** e nel log non resta nulla. Per collegarsi dalla rete:
+
+1. *Accesso* = **rete (IP ammessi)** e in *IP ammessi* gli indirizzi dei PC autorizzati (separati da virgola, al
+   massimo 20); *Salva setup*.
+2. Al primo ascolto Windows può chiedere il permesso del firewall per Node.js: autorizzare solo le **reti private**.
+3. Dall'altro PC: PuTTY *Raw* su `<ip-del-pc-simulatore>:4001`.
+
+Un PC non in elenco viene disconnesso subito e il log registra `server_client_refused` con motivo `ip`.
+
+> `HOST=0.0.0.0` serve solo ad aprire la **pagina web** da altri PC: non apre le porte dei canali, che dipendono
+> esclusivamente da *Accesso* e *IP ammessi* nel setup.
+
 ## Tasti rapidi
 
 F2 stampa · F3 fotocellula · F4 fine partita · F5 stampante on/off · F6 STD/MPP · F7 zero · F8 tara
@@ -129,7 +160,8 @@ server/
   config/env.js            PORT, HOST, SIM_TOKEN
   api/                     HTTP (sicurezza, cache, health), WebSocket (token, limiti), validazione comandi
   domain/                  motore di pesatura (engine.js), stringhe e checksum (format.js)
-  transport/               invio TCP/UDP con ACK/NAK, ricevitori di test, ricevitore da riga di comando
+  transport/               canali PC/FOM (TCP client, UDP, TCP server) con ACK/NAK, ricevitori di test,
+                           ricevitore da riga di comando
   storage/jsonStore.js     salvataggio atomico con .bak e recupero
   observability/logger.js  log JSON giornalieri
 client/src/

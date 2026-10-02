@@ -1,6 +1,6 @@
 # 0003 — Modalità server TCP · Spec
 
-> Stato: approvato
+> Stato: completato
 
 Deriva da [intent.md](intent.md). Descrive solo il comportamento osservabile. Ciclo di pesatura, formato delle stringhe
 e funzionamento in modalità client TCP / UDP ([spec.md](../../spec.md) § 3–6) **non cambiano**.
@@ -65,9 +65,11 @@ L'esito decide, come oggi, le uscite di errore (OUT1 / OUT2) e, per il FOM, la t
 
 La costituzione (§ 2) chiede un token per esporre il simulatore in rete. Una connessione TCP grezza come quella di
 PuTTY non può presentarlo. Per le porte server vale quindi una regola dedicata:
-- accesso di default **solo dal PC locale**;
-- accesso dalla rete solo con un **elenco esplicito di IP ammessi**;
-- ogni connessione rifiutata viene registrata nel log.
+- accesso di default **solo dal PC locale**: la porta non è raggiungibile dalla rete, quindi una connessione da un altro
+  PC viene rifiutata dal sistema operativo ("connection refused") e il simulatore non la vede né la registra;
+- accesso dalla rete solo con un **elenco esplicito di IP ammessi**: una connessione da un IP non in elenco viene
+  accettata e chiusa subito dal simulatore, e registrata nel log;
+- l'accesso alla porta del canale è indipendente da `HOST`, che riguarda solo l'interfaccia web.
 
 Serve un **emendamento della costituzione** § 2, da applicare quando questa spec viene approvata:
 
@@ -94,7 +96,8 @@ Serve un **emendamento della costituzione** § 2, da applicare quando questa spe
 - [ ] Fine partita con canale PC in TCP server → la stringa speciale arriva al client; senza client l'operazione si completa comunque.
 
 **Accesso**
-- [ ] Accesso `solo questo PC` → connessione dall'IP di rete del PC rifiutata e registrata nel log.
+- [ ] Accesso `solo questo PC` → connessione dall'IP di rete del PC rifiutata ("connection refused"); nessuna
+      riga nel log, perché la connessione non raggiunge il simulatore.
 - [ ] Accesso `rete` con IP ammesso → connessione accettata; con IP non in elenco → rifiutata e registrata.
 - [ ] Setup con accesso `rete` ed elenco IP vuoto o con un indirizzo non valido → rifiutato con errore.
 
@@ -118,3 +121,8 @@ Serve un **emendamento della costituzione** § 2, da applicare quando questa spe
   da confermare in approvazione: errore senza client; ACK/NAK sulla connessione aperta; tutti i client fino a 5;
   porte 4001/4002; rete solo con elenco di IP ammessi; solo stringhe successive al collegamento.
 - 2026-10-02 — approvata dall'utente, con le sei proposte; emendamento della costituzione § 2 applicato.
+- 2026-10-02 — **ritorno alla spec** (T13, prova dell'utente): il criterio "accesso solo questo PC → rifiutata e
+  registrata nel log" era in contrasto con TR-6 (ascolto su 127.0.0.1: il rifiuto lo fa il sistema operativo e il
+  simulatore non vede la connessione). Scelta dell'utente (opzione A): si corregge la spec, TR-6 resta. Il rifiuto
+  registrato vale per l'accesso "rete" con IP non in elenco. Aggiunto che l'accesso al canale è indipendente da `HOST`.
+- 2026-10-02 — change chiusa su conferma dell'utente (T15); TR-11 verificato con revisione, senza prova a rete staccata.

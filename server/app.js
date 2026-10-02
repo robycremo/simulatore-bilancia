@@ -43,7 +43,7 @@ export async function createApp({
     });
   } catch (e) {
     ws.close();
-    engine.close();
+    await engine.close();
     throw e;
   }
 
@@ -54,7 +54,7 @@ export async function createApp({
   const close = () =>
     (closing ??= (async () => {
       ws.close();
-      engine.close();
+      await engine.close();
       server.closeAllConnections();
       await new Promise((resolve) => server.close(() => resolve()));
       logger.info('shutdown');

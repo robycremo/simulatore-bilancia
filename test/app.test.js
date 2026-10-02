@@ -329,3 +329,136 @@ describe('arresto con segnale reale', { skip: process.platform === 'win32' && 's
   });
 });
 
+
+describe('modalità TCP server (0003)', () => {
+  // Client TCP grezzo (come PuTTY in modalità Raw) che accumula i dati ricevuti.
+  function rawClient(port) {
+    const sock = net.connect({ port, host: '127.0.0.1' });
+    const c = { sock, data: '', closed: false };
+    sock.setEncoding('latin1');
+    sock.on('data', (d) => (c.data += d));
+    sock.on('close', () => (c.closed = true));
+    sock.on('error', () => {});
+    return c;
+  }
+  const serverConfig = async (overrides = {}) => {
+    const c = await testConfig(overrides);
+    c.pc.proto = 'tcp-server';
+    c.pc.port = await freePort();
+    return c;
+  };
+  const clientsOf = (app, k = 'pc') => app.engine.getState().channels[k].clients;
+
+  test('config.json della 0002 (senza i nuovi campi) caricato con i default', async () => {
+    const c = await testConfig();
+    for (const k of ['pc', 'fom']) {
+      delete c[k].access;
+      delete c[k].allowedIps;
+    }
+    const { app } = await startApp({ config: c });
+    assert.equal(app.engine.config.pc.access, 'local');
+    assert.deepEqual(app.engine.config.fom.allowedIps, []);
+    assert.equal(app.engine.config.pc.proto, 'tcp');
+  });
+
+  test('pesata STD con PC in TCP server: il client riceve la stessa stringa del log', async () => {
+    const config = await serverConfig();
+    const { app, wsUrl, url } = await startApp({ config });
+    const raw = rawClient(config.pc.port);
+    assert.ok(await waitUntil(() => clientsOf(app) === 1, 2000));
+    const c = connect(wsUrl);
+    await c.opened;
+    c.cmd('setLoad', 237.5);
+    assert.ok(await waitUntil(() => app.engine.progressive === 2, 6000), 'pesata eseguita');
+    const tx = app.engine.txLog.find((l) => l.ch === 'PC');
+    assert.equal(tx.ok, true);
+    assert.equal(tx.clients, 1);
+    assert.ok(await waitUntil(() => raw.data.length === 104, 2000));
+    assert.equal(raw.data.replace('\r', '<CR>'), tx.payload);
+    // health e stato
+    const h = await (await fetch(`${url}/api/health`)).json();
+    assert.deepEqual(
+      { mode: h.channels.pc.mode, listening: h.channels.pc.listening, port: h.channels.pc.port, access: h.channels.pc.access, clients: h.channels.pc.clients },
+      { mode: 'tcp-server', listening: true, port: config.pc.port, access: 'local', clients: 1 }
+    );
+  });
+
+  test('FOM in TCP server senza client, totalizza solo con FOM corretta → OUT1, NESSUN CLIENT, non totalizzato', async () => {
+    const config = await serverConfig({ totalizeOnlyIfFomOk: true });
+    config.pc.proto = 'tcp';
+    config.pc.port = config.receivers[0].port;
+    config.fom.proto = 'tcp-server';
+    config.fom.port = await freePort();
+    const { app, wsUrl, dataDir } = await startApp({ config });
+    const c = connect(wsUrl);
+    await c.opened;
+    const t0 = Date.now();
+    c.cmd('setLoad', 50);
+    assert.ok(await waitUntil(() => app.engine.progressive === 2, 6000));
+    const fom = app.engine.txLog.find((l) => l.ch === 'FOM');
+    assert.equal(fom.reason, 'NESSUN CLIENT');
+    assert.equal(fom.clients, 0);
+    assert.ok(app.engine.outUntil.fom >= t0 + 500, 'OUT1');
+    assert.equal(app.engine.totals.count, 0);
+    assert.ok(readLog(dataDir).some((l) => l.event === 'tx_error' && l.ch === 'FOM' && l.reason === 'NESSUN CLIENT'));
+  });
+
+  test('MPP e fine partita con PC in TCP server; fine partita senza client completata', async () => {
+    const config = await serverConfig();
+    const { app, wsUrl } = await startApp({ config });
+    const c = connect(wsUrl);
+    await c.opened;
+
+    // fine partita senza client: l'operazione si completa comunque
+    c.cmd('setProgressive', 9);
+    await waitUntil(() => app.engine.progressive === 9);
+    c.cmd('endBatch');
+    assert.ok(await waitUntil(() => app.engine.txLog.some((l) => l.kind === 'FINE PARTITA')));
+    assert.equal(app.engine.progressive, 1);
+    assert.equal(app.engine.txLog.find((l) => l.kind === 'FINE PARTITA').reason, 'NESSUN CLIENT');
+
+    const raw = rawClient(config.pc.port);
+    assert.ok(await waitUntil(() => clientsOf(app) === 1, 2000));
+    c.cmd('toggleMode');
+    c.cmd('setData', { mpp: 42 });
+    await waitUntil(() => app.engine.opMode === 'MPP');
+    c.cmd('setLoad', 77.7);
+    assert.ok(await waitUntil(() => app.engine.txLog.some((l) => l.kind === 'MPP' && l.ok && l.clients === 1), 6000));
+    assert.ok(await waitUntil(() => raw.data.includes('    42') && raw.data.includes('77,7 kg'), 2000), raw.data);
+
+    c.cmd('setLoad', 0);
+    await waitUntil(() => app.engine.gross === 0 && app.engine.armedThreshold && app.engine.phase === 'PRONTO', 4000);
+    const before = raw.data.length;
+    c.cmd('endBatch');
+    assert.ok(await waitUntil(() => raw.data.length > before && raw.data.includes('FINE PARTITA'), 2000));
+  });
+
+  test('cambio porta dal setup: la vecchia porta rifiuta, la nuova accetta', async () => {
+    const config = await serverConfig();
+    const { app, wsUrl } = await startApp({ config });
+    const old = rawClient(config.pc.port);
+    assert.ok(await waitUntil(() => clientsOf(app) === 1, 2000));
+    const c = connect(wsUrl);
+    await c.opened;
+    const next = structuredClone(app.engine.config);
+    next.pc.port = await freePort();
+    c.cmd('updateConfig', next);
+    assert.ok(await waitUntil(() => app.engine.getState().channels.pc.port === next.pc.port && app.engine.getState().channels.pc.listening, 2000));
+    assert.ok(await waitUntil(() => old.closed, 2000), 'client della vecchia porta disconnesso');
+    const stale = rawClient(config.pc.port);
+    assert.ok(await waitUntil(() => stale.closed, 3000), 'vecchia porta chiusa');
+    rawClient(next.pc.port);
+    assert.ok(await waitUntil(() => clientsOf(app) === 1, 2000));
+  });
+
+  test('arresto con client collegati: client disconnessi, arresto entro 3 s', async () => {
+    const config = await serverConfig();
+    const { app } = await startApp({ config });
+    const raw = rawClient(config.pc.port);
+    assert.ok(await waitUntil(() => clientsOf(app) === 1, 2000));
+    const t0 = Date.now();
+    await app.close();
+    assert.ok(Date.now() - t0 < 3000);
+    assert.ok(await waitUntil(() => raw.closed, 1000));
+  });
+});

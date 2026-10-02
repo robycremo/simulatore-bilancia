@@ -49,14 +49,74 @@ const PROTO = [
   ['udp', 'UDP'],
 ];
 
-function Channel({ d, k, title, setD }) {
+const CHANNEL_PROTO = [
+  ['tcp', 'TCP client'],
+  ['udp', 'UDP'],
+  ['tcp-server', 'TCP server'],
+];
+const ACCESS = [
+  ['local', 'solo questo PC'],
+  ['network', 'rete (IP ammessi)'],
+];
+// Porte proposte passando a TCP server, se quella attuale è di un ricevitore di test (TR-5).
+const SERVER_PORT = { pc: 4001, fom: 4002 };
+
+const parseIps = (text) => text.split(/[\s,;]+/).filter(Boolean);
+
+// Elenco IP come testo separato da virgole; convertito in lista all'uscita dal campo.
+function IpList({ d, k, setD }) {
+  const ips = d[k].allowedIps;
+  const [text, setText] = useState(ips.join(', '));
+  useEffect(() => setText(ips.join(', ')), [ips]);
+  return (
+    <label className="sfield">
+      <span className="lab">IP ammessi</span>
+      <input
+        type="text"
+        value={text}
+        placeholder="es. 192.168.1.20, 192.168.1.21"
+        onChange={(e) => setText(e.target.value)}
+        onBlur={() => setD(set(d, `${k}.allowedIps`, parseIps(text)))}
+      />
+      <span className="hint">indirizzi IPv4 separati da virgola, al massimo 20</span>
+    </label>
+  );
+}
+
+function Channel({ d, k, title, setD, status }) {
+  const ch = d[k];
+  const server = ch.proto === 'tcp-server';
+  const setProto = (proto) => {
+    let next = set(d, `${k}.proto`, proto);
+    if (proto === 'tcp-server' && d.receivers.some((r) => r.port === ch.port)) next = set(next, `${k}.port`, SERVER_PORT[k]);
+    setD(next);
+  };
   return (
     <fieldset>
       <legend>{title}</legend>
       <Field d={d} setD={setD} path={`${k}.enabled`} label="Abilitata" type="bool" />
-      <Field d={d} setD={setD} path={`${k}.host`} label="Indirizzo IP" type="text" />
-      <Field d={d} setD={setD} path={`${k}.port`} label="Porta" />
-      <Field d={d} setD={setD} path={`${k}.proto`} label="Protocollo" options={PROTO} />
+      <label className="sfield">
+        <span className="lab">Protocollo</span>
+        <select value={ch.proto} onChange={(e) => setProto(e.target.value)}>
+          {CHANNEL_PROTO.map(([val, lab]) => (
+            <option key={val} value={val}>
+              {lab}
+            </option>
+          ))}
+        </select>
+        {server && <span className="hint">il simulatore ascolta: i client (es. PuTTY in modalità Raw) si collegano alla porta</span>}
+      </label>
+      {!server && <Field d={d} setD={setD} path={`${k}.host`} label="Indirizzo IP" type="text" />}
+      <Field d={d} setD={setD} path={`${k}.port`} label={server ? 'Porta di ascolto' : 'Porta'} />
+      {server && <Field d={d} setD={setD} path={`${k}.access`} label="Accesso" options={ACCESS} />}
+      {server && ch.access === 'network' && <IpList d={d} k={k} setD={setD} />}
+      {server && status?.mode === 'tcp-server' && (
+        <div className="sfield">
+          <span className="lab">Stato</span>
+          <span className={`badge ${status.listening ? 'ok' : 'ko'}`}>{status.status ?? 'NON ATTIVO'}</span>
+          <span className="hint">{status.listening ? `${status.clients} client collegati` : ''}</span>
+        </div>
+      )}
       <Field d={d} setD={setD} path={`${k}.ackNak`} label="Protocollo ACK/NAK" type="bool" />
       <Field d={d} setD={setD} path={`${k}.timeoutMs`} label="Timeout risposta (ms)" />
       <Field d={d} setD={setD} path={`${k}.retries`} label="Tentativi (ACK/NAK)" />
@@ -64,7 +124,7 @@ function Channel({ d, k, title, setD }) {
   );
 }
 
-export default function Setup({ config, cmd }) {
+export default function Setup({ config, cmd, state }) {
   const [d, setD] = useState(config);
   useEffect(() => setD(config), [config]);
   const dirty = JSON.stringify(d) !== JSON.stringify(config);
@@ -157,8 +217,8 @@ export default function Setup({ config, cmd }) {
         </p>
       </fieldset>
 
-      <Channel {...p} k="pc" title="7) Trasmissione a PC" />
-      <Channel {...p} k="fom" title="7) Trasmissione a FOM" />
+      <Channel {...p} k="pc" title="7) Trasmissione a PC" status={state?.channels?.pc} />
+      <Channel {...p} k="fom" title="7) Trasmissione a FOM" status={state?.channels?.fom} />
 
       <fieldset>
         <legend>Ricevitori di test</legend>

@@ -17,7 +17,7 @@
 |---|---|---|---|
 | TR-M1 | Ciclo del motore | tick 100 ms; stato alla UI a 10 Hz | 0001 |
 | TR-M2 | Stringa pesata | 104 caratteri, 106 con checksum; latin1; CR finale | 0001 |
-| TR-M3 | Trasmissione | TCP client (una connessione per stringa) o UDP; ACK `06h` / NAK `15h` | 0001 |
+| TR-M3 | Trasmissione | TCP client (una connessione per stringa), UDP o TCP server; ACK `06h` / NAK `15h` | 0001, 0003 |
 | TR-M4 | Uscite di errore | impulso 0,5 s (STD), circa 1 s (MPP) | 0001 |
 | TR-M5 | Ricevitori di test | PC 9100, FOM 9101 | 0001 |
 
@@ -46,3 +46,20 @@
 | TR-A13 | Seconda istanza | messaggio chiaro, codice di uscita 1, nessuno stack trace |
 
 Dettaglio e verifiche: [changes/0002-allineamento-stack/tech-requirements.md](changes/0002-allineamento-stack/tech-requirements.md).
+
+## Modalità TCP server (0003)
+
+| ID | Requisito | Misura / soglia |
+|---|---|---|
+| TR-T1 | Configurazione del canale | `proto`: `tcp` \| `udp` \| `tcp-server`; `access`: `local` \| `network`; `allowedIps`: 0–20 IPv4 senza duplicati |
+| TR-T2 | Setup rifiutato | `network` senza IP; porta server uguale all'altro canale in `tcp-server` o a un ricevitore di test |
+| TR-T3 | Compatibilità | `config.json` senza i nuovi campi → `access: local`, `allowedIps: []` |
+| TR-T4 | Interfaccia di ascolto | `local` → `127.0.0.1`; `network` → `0.0.0.0` (solo IPv4) con controllo dell'elenco |
+| TR-T5 | Client | ≤ 5 per canale; dati in arrivo scartati senza accumulo; disconnessione oltre 64 KB in attesa di invio |
+| TR-T6 | Client caduto | keep-alive TCP (ritardo iniziale 10 s), rimozione entro 60 s |
+| TR-T7 | Invio | `noDelay`, latin1, identico byte per byte alla modalità client; ai client entro 100 ms dalla pesata |
+| TR-T8 | Esito | nessun client → `NESSUN CLIENT`; senza ACK/NAK prima scrittura completata entro `timeoutMs`; con ACK/NAK primo `06h`, poi nuovi invii fino a `retries` |
+| TR-T9 | Disponibilità | nuovo tentativo di ascolto ogni 5 s; cambio di setup applicato entro 1 s; arresto entro i 3 s di TR-A11 |
+| TR-T10 | Osservabilità | eventi `server_*` nel log; `channels` in `/api/health` e nello stato alla UI |
+
+Dettaglio e verifiche: [changes/0003-modalita-server-tcp/tech-requirements.md](changes/0003-modalita-server-tcp/tech-requirements.md).

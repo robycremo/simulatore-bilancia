@@ -49,15 +49,36 @@ const arr = (item, length) => (v, ctx) => {
   return ok(out);
 };
 
+// Lista a lunghezza variabile (0…max), opzionalmente senza duplicati.
+const arrOf = (item, { max, unique = false }) => (v, ctx) => {
+  if (!Array.isArray(v) || v.length > max) return fail(`attesa lista di al massimo ${max} elementi`);
+  const out = [];
+  for (let i = 0; i < v.length; i++) {
+    const r = item(v[i], ctx);
+    if (!r.ok) return fail(`[${i}] ${r.error}`);
+    if (unique && out.includes(r.value)) return fail(`[${i}] valore duplicato "${r.value}"`);
+    out.push(r.value);
+  }
+  return ok(out);
+};
+
+const IPV4_RE = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
+const ipv4 = (v) => (typeof v === 'string' && IPV4_RE.test(v) ? ok(v) : fail(`indirizzo IPv4 non valido "${v}"`));
+
 const port = num(1, 65535, { int: true });
 const proto = oneOf('tcp', 'udp');
+const channelProto = oneOf('tcp', 'udp', 'tcp-server');
 const reply = oneOf('ack', 'nak', 'none');
+
+export const MAX_ALLOWED_IPS = 20;
 
 const channel = obj({
   enabled: bool,
   host: str(253, { min: 1 }),
   port,
-  proto,
+  proto: channelProto,
+  access: oneOf('local', 'network'),
+  allowedIps: arrOf(ipv4, { max: MAX_ALLOWED_IPS, unique: true }),
   ackNak: bool,
   timeoutMs: num(0, 60000, { int: true }),
   retries: num(0, 20, { int: true }),
@@ -71,7 +92,7 @@ const receiverCfg = obj({
   autoStart: bool,
 });
 
-export const configSchema = obj({
+const configFields = obj({
   triggerMode: oneOf('soglia', 'input'),
   threshold: num(0, 1e7),
   stableTimeout: num(0, 6000, { int: true }),
@@ -98,6 +119,28 @@ export const configSchema = obj({
   fom: channel,
   receivers: arr(receiverCfg, 2),
 });
+
+// Controlli tra campi del setup (modalità TCP server).
+function crossCheck(c) {
+  const receiverPorts = c.receivers.map((r) => r.port);
+  for (const k of ['pc', 'fom']) {
+    const ch = c[k];
+    if (ch.proto !== 'tcp-server') continue;
+    if (ch.access === 'network' && ch.allowedIps.length === 0)
+      return `${k}: con accesso "rete" serve almeno un IP ammesso`;
+    if (receiverPorts.includes(ch.port)) return `${k}: la porta ${ch.port} è già usata da un ricevitore di test`;
+  }
+  if (c.pc.proto === 'tcp-server' && c.fom.proto === 'tcp-server' && c.pc.port === c.fom.port)
+    return `pc e fom: stessa porta server ${c.pc.port}`;
+  return null;
+}
+
+export const configSchema = (v, ctx) => {
+  const r = configFields(v, ctx);
+  if (!r.ok) return r;
+  const error = crossCheck(r.value);
+  return error ? fail(error) : r;
+};
 
 const loadRange = (ctx) => (ctx?.config?.capacity ?? 0) * 1.2;
 
