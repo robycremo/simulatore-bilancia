@@ -9,6 +9,18 @@ import { DEFAULT_CONFIG } from '../server/domain/engine.js';
 
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Server e client aperti dai test: cleanup() li chiude anche se un test fallisce a metà,
+// altrimenti il processo dei test resterebbe aperto (e la CI bloccata).
+const openApps = new Set();
+const openClients = new Set();
+
+export async function cleanup() {
+  for (const c of openClients) c.ws.terminate();
+  openClients.clear();
+  await Promise.all([...openApps].map((a) => a.close()));
+  openApps.clear();
+}
+
 export function tempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'simulatore-test-'));
 }
@@ -45,6 +57,7 @@ export async function startApp({ config, dataDir = tempDir(), ...opts } = {}) {
   if (config !== null) fs.writeFileSync(path.join(dataDir, 'config.json'), JSON.stringify(config ?? (await testConfig())));
   const logger = createLogger({ dir: path.join(dataDir, 'logs'), toConsole: false });
   const app = await createApp({ port: 0, dataDir, logger, ...opts });
+  openApps.add(app);
   const url = `http://127.0.0.1:${app.address.port}`;
   return { app, dataDir, url, wsUrl: url.replace('http', 'ws') + '/ws' };
 }
@@ -61,6 +74,8 @@ export function readLog(dataDir) {
 // Client WebSocket di prova: raccoglie i messaggi e permette di attenderne uno.
 export function connect(wsUrl, options = {}) {
   const ws = new WebSocket(wsUrl, options);
+  const client = { ws };
+  openClients.add(client);
   const messages = [];
   const waiters = [];
   ws.on('message', (raw) => {

@@ -1,5 +1,5 @@
 // Test end-to-end su istanze reali (porte e cartelle temporanee): criteri di accettazione delle change 0001 e 0002.
-import { test, describe, after } from 'node:test';
+import { test, describe, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -9,10 +9,12 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createApp } from '../server/app.js';
 import { ConfigError } from '../server/config/env.js';
-import { startApp, testConfig, tempDir, connect, readLog, waitUntil, sleep, freePort } from './helpers.js';
+import { startApp, testConfig, tempDir, connect, readLog, waitUntil, sleep, freePort, cleanup } from './helpers.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'client', 'dist');
+
+afterEach(cleanup);
 
 function lanAddress() {
   for (const list of Object.values(os.networkInterfaces())) {
@@ -261,11 +263,11 @@ describe('pesatura e log (nessuna regressione 0001)', () => {
     const c = connect(wsUrl);
     await c.opened;
 
-    let out1 = false;
-    const watch = setInterval(() => (out1 ||= app.engine.getState().outputs.fom), 20);
+    // L'impulso e la fine della pesata avvengono nello stesso istante: si verifica che l'impulso sia stato emesso
+    // (scadenza di OUT1 successiva all'avvio della pesata) invece di tentare di osservarlo acceso.
+    const t0 = Date.now();
     c.cmd('setLoad', 237.5);
     assert.ok(await waitUntil(() => app.engine.progressive === 2, 6000), 'pesata eseguita');
-    clearInterval(watch);
 
     const tx = app.engine.txLog;
     const pc = tx.find((l) => l.ch === 'PC');
@@ -275,7 +277,7 @@ describe('pesatura e log (nessuna regressione 0001)', () => {
     assert.equal(fom.ok, false);
     assert.equal(fom.reason, 'NAK');
     assert.equal(fom.attempts, 2);
-    assert.ok(out1, 'impulso OUT1');
+    assert.ok(app.engine.outUntil.fom >= t0 + 500, 'impulso OUT1 di 0,5 s emesso');
     assert.equal(app.engine.totals.count, 0, 'non totalizzato');
     assert.ok(app.engine.rxLog.some((r) => r.rx === 'PC' && r.len === 104));
 
@@ -314,15 +316,16 @@ describe('arresto con segnale reale', { skip: process.platform === 'win32' && 's
   test('SIGINT: uscita con codice 0 entro 3 s', async () => {
     const port = await freePort();
     const p = runIndex({ PORT: String(port), HOST: '127.0.0.1' }, { untilExit: false });
-    assert.ok(await waitUntil(() => p.output().includes('Simulatore bilancia:'), 8000), p.output());
-    const t0 = Date.now();
-    p.child.kill('SIGINT');
-    const code = await p.exited;
-    assert.equal(code, 0);
-    assert.ok(Date.now() - t0 < 3000);
+    try {
+      assert.ok(await waitUntil(() => p.output().includes('Simulatore bilancia:'), 8000), p.output());
+      const t0 = Date.now();
+      p.child.kill('SIGINT');
+      const code = await p.exited;
+      assert.equal(code, 0);
+      assert.ok(Date.now() - t0 < 3000);
+    } finally {
+      if (p.child.exitCode === null) p.child.kill('SIGKILL');
+    }
   });
 });
 
-after(() => {
-  // i test lasciano solo cartelle temporanee di sistema
-});

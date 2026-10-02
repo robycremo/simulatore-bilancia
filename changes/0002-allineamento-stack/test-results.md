@@ -22,7 +22,7 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 | Avvio senza variabili → solo `localhost` | `app.test` › di default ascolta solo su 127.0.0.1 | ✅ |
 | `HOST=0.0.0.0` senza token → non parte, messaggio, codice ≠ 0 | `app.test` › errore di configurazione + lanciatore esce con 1 | ✅ |
 | Token remoto: richiesto, sbagliato → chiusura e log, giusto → funziona | `app.test` › client remoto (connessione dall'IP di rete del PC) | ✅ |
-| … dalla UI di un altro PC | manuale: browser su `http://<ip>:3000` con `HOST=0.0.0.0 SIM_TOKEN=…` → richiesta del token mostrata | ✅ richiesta · ⏳ inserimento token giusto/sbagliato (da eseguire a cura dell'utente) |
+| … dalla UI di un altro PC | manuale: browser su `http://<ip>:3000` con `HOST=0.0.0.0 SIM_TOKEN=…` → richiesta del token mostrata; prova dell'utente: token sbagliato → "Token non valido", token giusto → simulatore. Log: `auth_denied` da 10.152.0.172 alle 14:21:53, `auth_ok` alle 14:21:58 (UTC) | ✅ |
 | **API e validazione** | | |
 | `setLoad` non numerico → errore, carico invariato | `app.test` + `validate.test` | ✅ |
 | Comando inesistente → errore, stato invariato | `app.test` + `validate.test` | ✅ |
@@ -33,7 +33,7 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 | `state.json` corrotto → `*.corrupt-*`, avvio, avviso | `app.test` + `jsonStore.test` | ✅ |
 | `.bak` dopo un salvataggio | `jsonStore.test` + `app.test` | ✅ |
 | Arresto con progressivo 7 → uscita ≤ 3 s, progressivo 7 al riavvio | `app.test` (`close()` e riavvio) | ✅ |
-| … con segnale reale | `app.test` › SIGINT (Linux, CI) · manuale Ctrl+C su Windows (a cura dell'utente) | ⏳ |
+| … con segnale reale | manuale Windows (utente): Ctrl+C nel terminale PowerShell → `signal SIGINT` 14:46:17.224, `shutdown` 14:46:17.244 (20 ms). Conservazione dello stato al riavvio: stesso percorso di `close()`, verificato da `app.test`. Linux: `app.test` › SIGINT in CI, passato nell'esecuzione 37022088722 | ✅ Windows · ✅ Linux |
 | Ricevitore su porta occupata → errore, poi riparte entro 5 s | `app.test` | ✅ |
 | **Sicurezza, limiti e cache** | | |
 | WebSocket da altro sito → rifiutato | `app.test` (403) | ✅ |
@@ -87,7 +87,17 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
    solo `/ws`: `POST /api/client-error` riceveva 404 da Vite e l'errore non arrivava nel log. In produzione il problema
    non c'è (la UI è servita dal server). Aggiunto `/api` al proxy in `vite.config.js`; ripetuta la prova: riga
    `client_error` presente.
-4. **Script di test su Windows.** `node --test test/` non trova i file su Windows; usato il glob `"test/*.test.js"`.
+4. **CI bloccata al primo push** (T10), trovato sulla CI Linux (esecuzioni 37022088722 e 37022248116, annullate dopo
+   circa 5 minuti). Due difetti nei test, non nel simulatore:
+   - il test "FOM in NAK" osservava OUT1 con un controllo ogni 20 ms, ma impulso e fine pesata avvengono nello stesso
+     istante: su Linux il test ha visto prima il fine pesata e non l'impulso. Ora verifica che l'impulso sia stato
+     emesso (scadenza di OUT1 ≥ avvio + 0,5 s);
+   - un test fallito lasciava aperto il suo server di prova e il processo dei test non terminava più. Ora
+     `afterEach(cleanup)` chiude server e client aperti anche in caso di errore; il test con `SIGINT` chiude il processo
+     figlio in ogni caso; `npm test` usa `--test-timeout=60000 --test-force-exit`; il job CI ha `timeout-minutes: 10`.
+   Verifica: con un test rotto apposta la suite termina in 15 s con esito di fallimento invece di bloccarsi; suite
+   completa 42/42 in locale. Nello stesso log Linux tutti gli altri test, compreso l'arresto con `SIGINT` reale, sono passati.
+5. **Script di test su Windows.** `node --test test/` non trova i file su Windows; usato il glob `"test/*.test.js"`.
 
 ## Registro
 

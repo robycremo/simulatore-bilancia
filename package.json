@@ -10,7 +10,7 @@
     "start": "node server/index.js",
     "listen": "node server/transport/listen.js",
     "check:flow": "node scripts/check-flow.mjs",
-    "test": "node --test --test-concurrency=1 \"test/*.test.js\"",
+    "test": "node --test --test-concurrency=1 --test-timeout=60000 --test-force-exit \"test/*.test.js\"",
     "prod": "npm run build && npm start"
   },
   "dependencies": {

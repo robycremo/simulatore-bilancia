@@ -30,8 +30,8 @@ Deriva da [plan.md](plan.md). Si spunta man mano.
   - [x] cursore del carico, assenza di violazioni CSP, richiesta del token dall'IP di rete
   - [x] errore React con `?crash` (ha richiesto la correzione del proxy di Vite)
   - [x] `npm run prod` da copia pulita
-  - [ ] token giusto e sbagliato dalla UI (utente)
-  - [ ] Ctrl+C su Windows (utente)
+  - [x] token giusto e sbagliato dalla UI (utente)
+  - [x] Ctrl+C su Windows (utente)
   - [ ] CI al primo push: workflow verde, poi ramo di prova con un test rotto che la fa fallire
 - [x] **T12. Documentazione.** README: *Installazione su PC di collaudo*. Documenti vivi: `spec.md` § 8 e nuovo § 9
       *Operatività*; `tech-requirements.md` e `plan.md` in radice con la nuova architettura.
