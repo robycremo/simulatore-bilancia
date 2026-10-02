@@ -66,7 +66,7 @@ Tra parentesi i requisiti tecnici coperti.
 
 ## Chiusura
 
-- [ ] **T14. Documentazione.** README: uso con PuTTY, nota sul firewall di Windows in accesso `rete`. Documenti vivi:
+- [x] **T14. Documentazione.** README: uso con PuTTY, nota sul firewall di Windows in accesso `rete`. Documenti vivi:
       `spec.md` § 2, § 6, § 7, § 8; `tech-requirements.md` con TR-1…TR-22; `plan.md` con i nuovi moduli.
 - [ ] **T15. Chiusura.** `npm run check:flow`, `npm run build`, `npm test`, `npm audit` verdi; test-results completato;
       tutti i file della change a `completato`; PR con il modello.

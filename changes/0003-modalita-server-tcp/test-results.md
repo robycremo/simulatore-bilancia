@@ -63,6 +63,13 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 | TR-20 | `serverChannel.test` + `app.test` (eventi nel log) | ✅ |
 | TR-21, TR-22 | `app.test` + manuale nel browser | ✅ |
 
+## Documentazione (T14)
+
+| Verifica | Esito |
+|---|---|
+| README: sezione *Uso con PuTTY* (setup, PuTTY Raw, comportamento, accesso dalla rete, firewall, `HOST` vs accesso del canale), porte e struttura aggiornate | ✅ revisione |
+| Documenti vivi: `spec.md` § 2, § 6 *Protocollo*, § 7, § 8, § 9; `tech-requirements.md` TR-T1…T10; `plan.md` architettura e moduli | ✅ revisione |
+
 ## Problemi trovati
 
 1. **Rifiuto lento su Windows** (T4). Una connessione verso una porta non in ascolto sul proprio IP di rete viene

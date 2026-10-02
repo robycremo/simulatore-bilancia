@@ -8,9 +8,12 @@
 
 ```text
  Browser (React)                    server/
-   client/src  ──WebSocket /ws──►  api/ws.js ──(validate)──►  domain/engine.js ──► transport/net.js ──► PC / FOM
-               ◄── stato 10 Hz ──                                │                 transport/receiver.js ◄── (test)
-               ──HTTP──────────►  api/http.js (UI, health)       ├─► storage/jsonStore.js    data/*.json
+   client/src  ──WebSocket /ws──►  api/ws.js ──(validate)──►  domain/engine.js
+               ◄── stato 10 Hz ──                                │
+               ──HTTP──────────►  api/http.js (UI, health)       ├─► transport/channels.js ─┬─► net.js ──────────► PC / FOM (client TCP, UDP)
+                                                                 │                          └─► serverChannel.js ◄── PC / FOM / PuTTY (TCP server)
+                                                                 ├─► transport/receiver.js ◄── (ricevitori di test)
+                                                                 ├─► storage/jsonStore.js    data/*.json
                                                                  └─► observability/logger.js data/logs/
  app.js compone i livelli (createApp); index.js legge le variabili d'ambiente e gestisce i segnali.
 ```
@@ -35,7 +38,9 @@
 | `server/api/auth.js` | Auth | confronto del token a tempo costante |
 | `server/domain/engine.js` | — | stato del terminale, ciclo di pesatura, comandi `cmd_*`, health, arresto |
 | `server/domain/format.js` | — | stringhe 104/106, template, checksum |
-| `server/transport/net.js` | — | invio TCP/UDP, ACK/NAK, ritentativi |
+| `server/transport/channels.js` | — | canali PC e FOM: interfaccia unica `send()` per il motore; crea client o server in base al protocollo; riparte solo se cambiano modalità, porta o accesso |
+| `server/transport/serverChannel.js` | Auth, Rate limiting | TCP server: accesso locale o IP ammessi, max 5 client, ACK/NAK, client lenti, keep-alive, nuovo tentativo di ascolto |
+| `server/transport/net.js` | — | invio TCP client/UDP, ACK/NAK, ritentativi |
 | `server/transport/receiver.js` | — | ricevitori di test TCP/UDP |
 | `server/transport/listen.js` | — | ricevitore da riga di comando |
 | `server/storage/jsonStore.js` | Storage | lettura con recupero, scrittura atomica con `.bak` |
