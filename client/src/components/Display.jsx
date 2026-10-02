@@ -44,6 +44,13 @@ export default function Display({ state: s, config: c }) {
         <span className="trig">{c.triggerMode === 'soglia' ? `SOGLIA ${fmtW(c.threshold, c)}` : 'INPUT/FC'}</span>
         <span className={`out ${s.outputs.fom ? 'lit' : ''}`}>OUT1 ERR FOM</span>
         <span className={`out ${s.outputs.pc ? 'lit' : ''}`}>OUT2 ERR PC</span>
+        {['pc', 'fom'].map((k) =>
+          s.channels?.[k]?.mode === 'tcp-server' && s.channels[k].listening !== undefined ? (
+            <span key={k} className={`srv ${s.channels[k].clients ? 'on' : ''}`} title={s.channels[k].status}>
+              {k.toUpperCase()}: {s.channels[k].clients} client
+            </span>
+          ) : null
+        )}
       </div>
     </div>
   );

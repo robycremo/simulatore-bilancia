@@ -51,7 +51,7 @@ export function TxPanel({ lists, cmd }) {
         {lists.txLog.map((l, i) => (
           <div key={i} className={l.ok ? '' : 'err'}>
             <span className="t">{l.t}</span> <b>{l.ch}</b> {l.kind} · {l.reason}
-            {l.attempts > 1 ? ` (${l.attempts} tentativi)` : ''} · {l.payload.replace(/<CR>$/, '').length + 1} car.
+            {l.attempts > 1 ? ` (${l.attempts} tentativi)` : ''}{l.clients != null ? ` · ${l.clients} client` : ''} · {l.payload.replace(/<CR>$/, '').length + 1} car.
             <pre>{l.payload}</pre>
           </div>
         ))}

@@ -3,7 +3,7 @@
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import path from 'node:path';
-import { transmit } from '../transport/net.js';
+import { ChannelManager } from '../transport/channels.js';
 import { TestReceiver } from '../transport/receiver.js';
 import { readJson, writeJsonSync } from '../storage/jsonStore.js';
 import { nullLogger, errorInfo } from '../observability/logger.js';
@@ -49,8 +49,9 @@ export const DEFAULT_CONFIG = {
   mppTemplate: '{data}{ora}{mpp}{prog}{netto}',
   endBatchTemplate: '{data}{ora}FINE PARTITA{npesate}{totnetto}',
   // 7) canali di trasmissione
-  pc: { enabled: true, host: '127.0.0.1', port: 9100, proto: 'tcp', ackNak: false, timeoutMs: 1000, retries: 3 },
-  fom: { enabled: true, host: '127.0.0.1', port: 9101, proto: 'tcp', ackNak: false, timeoutMs: 1000, retries: 3 },
+  // proto: 'tcp' (client), 'udp', 'tcp-server'; access e allowedIps valgono solo per 'tcp-server'
+  pc: { enabled: true, host: '127.0.0.1', port: 9100, proto: 'tcp', access: 'local', allowedIps: [], ackNak: false, timeoutMs: 1000, retries: 3 },
+  fom: { enabled: true, host: '127.0.0.1', port: 9101, proto: 'tcp', access: 'local', allowedIps: [], ackNak: false, timeoutMs: 1000, retries: 3 },
   // ricevitori di test integrati
   receivers: [
     { name: 'PC', port: 9100, proto: 'tcp', reply: 'ack', autoStart: true },
@@ -149,6 +150,8 @@ export class Engine extends EventEmitter {
       return r;
     });
 
+    this.channels = new ChannelManager(this.config, { logger: this.log, onChange: () => (this.listsDirty = true) });
+
     this.timer = setInterval(() => this.tick(), TICK_MS);
   }
 
@@ -192,14 +195,16 @@ export class Engine extends EventEmitter {
     }
   }
 
-  // Arresto: ferma tick, ricevitori e tentativi, salva lo stato.
+  // Arresto: ferma tick, ricevitori e tentativi, salva lo stato, chiude i canali in modalità server.
   close() {
-    if (this.closed) return;
+    if (this.closed) return this.closing;
     this.closed = true;
     clearInterval(this.timer);
     this.retryTimers.forEach(clearTimeout);
     this.receivers.forEach((r) => r.stop());
     this.saveStateSync();
+    this.closing = this.channels.close();
+    return this.closing;
   }
 
   getHealth() {
@@ -214,6 +219,7 @@ export class Engine extends EventEmitter {
         running: r.running,
         status: r.status,
       })),
+      channels: this.channels.status(),
     };
   }
 
@@ -231,7 +237,7 @@ export class Engine extends EventEmitter {
 
   logTx(entry) {
     if (!entry.ok) {
-      this.log.warn('tx_error', { ch: entry.ch, kind: entry.kind, reason: entry.reason, attempts: entry.attempts });
+      this.log.warn('tx_error', { ch: entry.ch, kind: entry.kind, reason: entry.reason, attempts: entry.attempts, clients: entry.clients });
     }
     this.txLog.push({ t: F.fmtTime(new Date()), ...entry, payload: F.visible(entry.payload) });
     cap(this.txLog, 200);
@@ -364,8 +370,8 @@ export class Engine extends EventEmitter {
       const ch = c[key];
       if (!ch.enabled) continue;
       jobs.push(
-        transmit(ch, payload).then((r) => {
-          this.logTx({ ch: key.toUpperCase(), kind: 'PESATA', ok: r.ok, reason: r.reason, attempts: r.attempts, payload });
+        this.channels.send(key, payload).then((r) => {
+          this.logTx({ ch: key.toUpperCase(), kind: 'PESATA', ok: r.ok, reason: r.reason, attempts: r.attempts, clients: r.clients, payload });
           if (!r.ok) this.pulse(key, 500);
           return [key, r.ok];
         })
@@ -462,9 +468,9 @@ export class Engine extends EventEmitter {
     if (!c.pc.enabled) return done(null);
 
     const payload = F.fillTemplate(c.mppTemplate, rec, c);
-    transmit(c.pc, payload).then((r) => {
+    this.channels.send('pc', payload).then((r) => {
       entry.tx = r.ok ? 'OK' : r.reason;
-      this.logTx({ ch: 'PC', kind: 'MPP', ok: r.ok, reason: r.reason, attempts: r.attempts, payload });
+      this.logTx({ ch: 'PC', kind: 'MPP', ok: r.ok, reason: r.reason, attempts: r.attempts, clients: r.clients, payload });
       if (!r.ok) {
         this.pulse('pc', 1000);
         this.showMessage('ERRORE TRASM PC', 2500);
@@ -530,8 +536,8 @@ export class Engine extends EventEmitter {
     if (c.pc.enabled) {
       const payload = F.fillTemplate(c.endBatchTemplate, rec, c, extra);
       // l'esito non influisce sull'operazione
-      transmit(c.pc, payload, c.endBatchAckNak).then((r) =>
-        this.logTx({ ch: 'PC', kind: 'FINE PARTITA', ok: r.ok, reason: r.reason, attempts: r.attempts, payload })
+      this.channels.send('pc', payload, { ackNak: c.endBatchAckNak }).then((r) =>
+        this.logTx({ ch: 'PC', kind: 'FINE PARTITA', ok: r.ok, reason: r.reason, attempts: r.attempts, clients: r.clients, payload })
       );
     }
   }
@@ -609,6 +615,7 @@ export class Engine extends EventEmitter {
     }
     const changed = Object.keys(this.config).filter((k) => JSON.stringify(old[k]) !== JSON.stringify(this.config[k]));
     this.log.info('config_updated', { changed });
+    this.channels.reconfigure(this.config);
     this.emit('config');
     this.showMessage('SETUP SALVATO', 1500);
   }
@@ -652,6 +659,7 @@ export class Engine extends EventEmitter {
       data: this.data,
       photocell: this.photocell,
       armed: this.config.triggerMode === 'soglia' ? this.armedThreshold : this.armedPhotocell,
+      channels: this.channels.status(),
     };
   }
 

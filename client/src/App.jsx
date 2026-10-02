@@ -81,7 +81,7 @@ export default function App() {
             {tab === 'tx' && <TxPanel lists={lists} cmd={cmd} />}
             {tab === 'mpp' && <MppPanel lists={lists} config={config} cmd={cmd} />}
             {tab === 'rx' && <ReceiverPanel lists={lists} config={config} cmd={cmd} />}
-            {tab === 'setup' && <Setup config={config} cmd={cmd} />}
+            {tab === 'setup' && <Setup config={config} cmd={cmd} state={state} />}
           </div>
         </section>
       </main>
