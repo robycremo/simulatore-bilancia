@@ -70,4 +70,4 @@
 |---|---|
 | [0001-simulatore-iniziale](changes/0001-simulatore-iniziale/plan.md) | completato |
 | [0002-allineamento-stack](changes/0002-allineamento-stack/test-results.md) | completato |
-| [0003-modalita-server-tcp](changes/0003-modalita-server-tcp/tasks.md) | documenti approvati, codice da iniziare |
+| [0003-modalita-server-tcp](changes/0003-modalita-server-tcp/test-results.md) | completato |

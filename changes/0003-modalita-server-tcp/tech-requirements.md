@@ -1,6 +1,6 @@
 # 0003 — Modalità server TCP · Requisiti tecnici
 
-> Stato: approvato
+> Stato: completato
 
 Vincoli tecnici misurabili. Derivano da [spec.md](spec.md) e dalla [costituzione](../../constitution.md).
 Presuppongono la change 0002 chiusa (validazione, log, health, test end-to-end).
@@ -75,3 +75,4 @@ Nessuna nuova dipendenza. Server TCP con `node:net`.
 - 2026-10-02 — creata vuota, in attesa del documento precedente.
 - 2026-10-02 — scritta dopo l'approvazione della spec.
 - 2026-10-02 — approvati dall'utente.
+- 2026-10-02 — change chiusa su conferma dell'utente (T15); TR-11 verificato con revisione, senza prova a rete staccata.

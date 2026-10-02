@@ -1,6 +1,6 @@
 # 0003 — Modalità server TCP · Tasks
 
-> Stato: in corso
+> Stato: completato
 
 Deriva da [plan.md](plan.md). Ordine di esecuzione: ogni task si chiude con i suoi test verdi prima del successivo.
 Tra parentesi i requisiti tecnici coperti.
@@ -60,7 +60,7 @@ Tra parentesi i requisiti tecnici coperti.
 - [x] **T12. `app.test.js`.** Pesata STD con PC in `tcp-server` → il client riceve la stessa stringa del log; FOM senza
       client con totalizzazione condizionata (OUT1, `NESSUN CLIENT`, non totalizzato); MPP; fine partita senza client
       completata; cambio porta dal setup; health; arresto con client collegati.
-- [ ] **T13. Prove manuali** (in [test-results.md](test-results.md)): PuTTY *Raw* su `127.0.0.1:4001` (stringa
+- [x] **T13. Prove manuali** (in [test-results.md](test-results.md)): PuTTY *Raw* su `127.0.0.1:4001` (stringa
       visibile e identica, testo digitato ignorato, chiusura della finestra); PuTTY da un secondo PC con accesso `rete`
       e con IP non ammesso; client caduto per rete staccata entro 60 s (TR-11).
 
@@ -68,7 +68,7 @@ Tra parentesi i requisiti tecnici coperti.
 
 - [x] **T14. Documentazione.** README: uso con PuTTY, nota sul firewall di Windows in accesso `rete`. Documenti vivi:
       `spec.md` § 2, § 6, § 7, § 8; `tech-requirements.md` con TR-1…TR-22; `plan.md` con i nuovi moduli.
-- [ ] **T15. Chiusura.** `npm run check:flow`, `npm run build`, `npm test`, `npm audit` verdi; test-results completato;
+- [x] **T15. Chiusura.** `npm run check:flow`, `npm run build`, `npm test`, `npm audit` verdi; test-results completato;
       tutti i file della change a `completato`; PR con il modello.
 
 ## Registro
@@ -77,3 +77,4 @@ Tra parentesi i requisiti tecnici coperti.
 - 2026-10-02 — scritti dopo l'approvazione del plan.
 - 2026-10-02 — approvati dall'utente.
 - 2026-10-02 — inizio implementazione sul ramo `0003-modalita-server-tcp` (0002 chiusa con c3372f4).
+- 2026-10-02 — change chiusa su conferma dell'utente (T15); TR-11 verificato con revisione, senza prova a rete staccata.

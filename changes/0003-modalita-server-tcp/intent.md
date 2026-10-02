@@ -1,6 +1,6 @@
 # 0003 — Modalità server TCP · Intent
 
-> Stato: approvato
+> Stato: completato
 
 ## Work item
 
@@ -54,3 +54,4 @@ comportamento non cambia: ciclo di pesatura, esiti, totalizzazione, uscite di er
 
 - 2026-10-02 — creata su richiesta dell'utente, che vuole usare PuTTY per ricevere le stringhe.
 - 2026-10-02 — approvato dall'utente.
+- 2026-10-02 — change chiusa su conferma dell'utente (T15); TR-11 verificato con revisione, senza prova a rete staccata.

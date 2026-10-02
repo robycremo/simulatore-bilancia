@@ -1,6 +1,6 @@
 # 0003 — Modalità server TCP · Spec
 
-> Stato: approvato
+> Stato: completato
 
 Deriva da [intent.md](intent.md). Descrive solo il comportamento osservabile. Ciclo di pesatura, formato delle stringhe
 e funzionamento in modalità client TCP / UDP ([spec.md](../../spec.md) § 3–6) **non cambiano**.
@@ -125,3 +125,4 @@ Serve un **emendamento della costituzione** § 2, da applicare quando questa spe
   registrata nel log" era in contrasto con TR-6 (ascolto su 127.0.0.1: il rifiuto lo fa il sistema operativo e il
   simulatore non vede la connessione). Scelta dell'utente (opzione A): si corregge la spec, TR-6 resta. Il rifiuto
   registrato vale per l'accesso "rete" con IP non in elenco. Aggiunto che l'accesso al canale è indipendente da `HOST`.
+- 2026-10-02 — change chiusa su conferma dell'utente (T15); TR-11 verificato con revisione, senza prova a rete staccata.

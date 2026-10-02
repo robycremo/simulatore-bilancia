@@ -1,6 +1,6 @@
 # 0003 — Modalità server TCP · Plan
 
-> Stato: approvato
+> Stato: completato
 
 Deriva da [spec.md](spec.md) e [tech-requirements.md](tech-requirements.md).
 **Prerequisito:** change 0002 chiusa. Il codice si appoggia a validazione, log, health e test end-to-end della 0002.
@@ -107,3 +107,4 @@ client/src/components/
 - 2026-10-02 — creata vuota, in attesa del documento precedente.
 - 2026-10-02 — scritto dopo l'approvazione dei requisiti tecnici.
 - 2026-10-02 — approvato dall'utente.
+- 2026-10-02 — change chiusa su conferma dell'utente (T15); TR-11 verificato con revisione, senza prova a rete staccata.
