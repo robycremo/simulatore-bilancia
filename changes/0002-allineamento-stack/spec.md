@@ -1,6 +1,6 @@
 # 0002 — Allineamento allo stack di produzione · Spec
 
-> Stato: approvato
+> Stato: completato
 
 Deriva da [intent.md](intent.md). Descrive solo il comportamento osservabile: il *come* è nel plan.
 Il comportamento di pesatura e il formato delle stringhe ([spec.md](../../spec.md) § 1–7) **non cambiano**.
@@ -169,3 +169,4 @@ sull'esempio di riferimento, i due checksum, i template MPP e fine partita, la v
 - 2026-10-02 — creata vuota, in attesa dell'intent.
 - 2026-10-02 — scritta dopo l'approvazione dell'intent.
 - 2026-10-02 — approvata dall'utente.
+- 2026-10-02 — change chiusa su conferma dell'utente (T13).

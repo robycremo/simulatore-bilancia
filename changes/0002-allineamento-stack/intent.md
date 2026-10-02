@@ -1,6 +1,6 @@
 # 0002 — Allineamento allo stack di produzione · Intent
 
-> Stato: approvato
+> Stato: completato
 
 ## Work item
 
@@ -46,3 +46,4 @@ decisione motivata di non applicabilità. Nessun cambiamento al comportamento di
 
 - 2026-10-02 — creata. Spec e plan si scrivono dopo l'approvazione di questo intent.
 - 2026-10-02 — approvato dall'utente.
+- 2026-10-02 — change chiusa su conferma dell'utente (T13).

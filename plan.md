@@ -64,5 +64,5 @@
 | Change | Stato |
 |---|---|
 | [0001-simulatore-iniziale](changes/0001-simulatore-iniziale/plan.md) | completato |
-| [0002-allineamento-stack](changes/0002-allineamento-stack/tasks.md) | in corso (codice fatto, prove manuali e documentazione da completare) |
-| [0003-modalita-server-tcp](changes/0003-modalita-server-tcp/intent.md) | bozza (intent) |
+| [0002-allineamento-stack](changes/0002-allineamento-stack/test-results.md) | completato |
+| [0003-modalita-server-tcp](changes/0003-modalita-server-tcp/tasks.md) | documenti approvati, codice da iniziare |

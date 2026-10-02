@@ -1,6 +1,6 @@
 # 0002 — Allineamento allo stack di produzione · Plan
 
-> Stato: approvato
+> Stato: completato
 
 Deriva da [spec.md](spec.md) e [tech-requirements.md](tech-requirements.md).
 
@@ -101,3 +101,4 @@ i compiti in [tasks.md](tasks.md).
 - 2026-10-02 — adeguato al percorso SDD (emendamento della costituzione): i passi sono diventati
   [tasks.md](tasks.md), la tabella di verifica [test-results.md](test-results.md), i vincoli numerici
   [tech-requirements.md](tech-requirements.md). Stato da "in corso" ad "approvato": l'avanzamento ora sta in tasks.md.
+- 2026-10-02 — change chiusa su conferma dell'utente (T13).

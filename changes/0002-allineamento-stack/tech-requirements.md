@@ -1,6 +1,6 @@
 # 0002 — Allineamento allo stack di produzione · Requisiti tecnici
 
-> Stato: approvato
+> Stato: completato
 
 Vincoli tecnici misurabili. Derivano da [spec.md](spec.md) e dalla [costituzione](../../constitution.md).
 
@@ -55,3 +55,4 @@ I test usano `node:test` (incluso in Node).
 
 - 2026-10-02 — creato all'introduzione del passo *tech-requirements* (emendamento della costituzione) estraendo i vincoli
   dalla spec e dal plan già approvati: nessun requisito nuovo, per questo nasce come approvato.
+- 2026-10-02 — change chiusa su conferma dell'utente (T13).

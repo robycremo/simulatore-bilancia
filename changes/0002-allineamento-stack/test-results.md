@@ -1,6 +1,6 @@
 # 0002 — Allineamento allo stack di produzione · Test results
 
-> Stato: in corso
+> Stato: completato
 
 Verifica dei criteri di [spec.md](spec.md) e dei requisiti di [tech-requirements.md](tech-requirements.md).
 Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
@@ -12,7 +12,8 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 | 2026-10-02 | Windows 11, Node 26.7 | `npm test` | 42 superati, 0 falliti; 1 gruppo saltato (arresto con `SIGINT` reale: solo Linux) |
 | 2026-10-02 | Windows 11, Node 26.7 | `npm run build && npm test` dopo la correzione del proxy di Vite | 42 superati, 0 falliti |
 | 2026-10-02 | Windows 11, Node 26.7 | `npm audit --audit-level=high` | 0 vulnerabilità |
-| — | CI Linux, Node 22 | workflow CI | ⏳ al primo push |
+| 2026-10-02 | CI Linux (ubuntu-latest), Node 22 | workflow CI, prima esecuzione (`d646b9c`) | bloccata su `npm test`, annullata: vedi *Problemi* § 4 |
+| 2026-10-02 | CI Linux (ubuntu-latest), Node 22 | workflow CI su `main` (`8c24cbd`, esecuzione 37023485291) | ✅ tutti i passi: check-flow, build, test (compreso `SIGINT` reale), audit |
 
 ## Criteri di accettazione
 
@@ -49,7 +50,7 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 | Errore React → pannello con Ricarica + riga nel log | manuale: `npm run dev`, `http://localhost:5173/?crash` → pannello "Errore dell'interfaccia" con **Ricarica**, riga `client_error` con messaggio e stack | ✅ (dopo correzione, vedi *Problemi*) |
 | Log oltre 14 giorni eliminati all'avvio | `logger.test` | ✅ |
 | **CI e documentazione** | | |
-| CI con check:flow, test, build, audit; fallisce con un test rotto | manuale: ramo di prova con asserzione sbagliata | ⏳ |
+| CI con check:flow, test, build, audit; fallisce con un test rotto | CI verde su `main` (esecuzione 37023485291). Ramo `prova/ci-fallisce` con lunghezza attesa 105 invece di 104, PR [#1](https://github.com/robycremo/simulatore-bilancia/pull/1): CI rossa su `npm test` in 27 s (2 falliti, 41 superati; esecuzione 37023506175). PR chiusa senza merge, ramo cancellato | ✅ |
 | Stringa dell'esempio di riferimento campo per campo | `format.test` | ✅ |
 | `npm run prod` da clone pulito dopo `npm ci` | manuale: i 67 file versionati (`git ls-files`, senza `node_modules`, `client/dist`, `data`) copiati in una cartella temporanea → `npm ci` → `PORT=3100 npm run prod` → `/api/health` 200, `GET /` 200. Il repository non ha ancora commit, per questo copia al posto di `git clone` | ✅ |
 | README con *Installazione su PC di collaudo* | revisione: requisiti, installazione, avvio, messaggi d'errore, variabili, accesso da un altro PC con nota sul firewall, dati e log, ricevitore da riga di comando | ✅ |
@@ -59,7 +60,7 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 
 | ID | Verifica | Esito |
 |---|---|---|
-| TR-1 | CI su Node 22, uso su Node 26 | ✅ locale · ⏳ CI |
+| TR-1 | CI su Node 22 (Linux), uso su Node 26 (Windows) | ✅ |
 | TR-2 | `package.json`: dipendenze di runtime `express`, `ws` | ✅ |
 | TR-3, TR-4 | `app.test` | ✅ |
 | TR-5 | revisione di `api/auth.js` e dei log (`auth_denied` senza token) | ✅ |
@@ -72,7 +73,7 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 | TR-17, TR-18 | `jsonStore.test` + `app.test` | ✅ |
 | TR-19 | `logger.test` | ✅ |
 | TR-20 | revisione: `appendFileSync` prima di `process.exit(1)` | ✅ |
-| TR-21 | `app.test` (`close()` < 3 s) · segnale reale | ✅ · ⏳ |
+| TR-21 | `app.test` (`close()` < 3 s) · segnale reale: Windows Ctrl+C 20 ms, Linux `SIGINT` in CI | ✅ |
 | TR-22, TR-23 | `app.test` | ✅ |
 | TR-24 | `format.test` + `app.test` regressione 0001 | ✅ |
 
@@ -103,3 +104,4 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 
 - 2026-10-02 — creato all'introduzione del passo *test-results* (emendamento della costituzione) con gli esiti delle
   verifiche già eseguite.
+- 2026-10-02 — change chiusa su conferma dell'utente (T13).

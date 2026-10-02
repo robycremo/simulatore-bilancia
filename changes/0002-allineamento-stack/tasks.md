@@ -1,6 +1,6 @@
 # 0002 — Allineamento allo stack di produzione · Tasks
 
-> Stato: in corso
+> Stato: completato
 
 Deriva da [plan.md](plan.md). Si spunta man mano.
 
@@ -26,16 +26,17 @@ Deriva da [plan.md](plan.md). Si spunta man mano.
       ora invia un numero.
 - [x] **T10. Test e CI.** 6 file di test (`format`, `validate`, `rateLimit`, `jsonStore`, `logger`, `app`),
       script `test` e `prod`, CI con build, test e audit.
-- [ ] **T11. Prove manuali** elencate in [test-results.md](test-results.md).
+- [x] **T11. Prove manuali** elencate in [test-results.md](test-results.md).
   - [x] cursore del carico, assenza di violazioni CSP, richiesta del token dall'IP di rete
   - [x] errore React con `?crash` (ha richiesto la correzione del proxy di Vite)
   - [x] `npm run prod` da copia pulita
   - [x] token giusto e sbagliato dalla UI (utente)
   - [x] Ctrl+C su Windows (utente)
-  - [ ] CI al primo push: workflow verde, poi ramo di prova con un test rotto che la fa fallire
+  - [x] CI al primo push: workflow verde, poi ramo di prova con un test rotto che la fa fallire (dopo la correzione
+        dei test, problema 4 in test-results)
 - [x] **T12. Documentazione.** README: *Installazione su PC di collaudo*. Documenti vivi: `spec.md` § 8 e nuovo § 9
       *Operatività*; `tech-requirements.md` e `plan.md` in radice con la nuova architettura.
-- [ ] **T13. Chiusura.** Tutti i file della change a `completato`.
+- [x] **T13. Chiusura.** Tutti i file della change a `completato`.
 
 ## Note di implementazione
 
@@ -49,3 +50,4 @@ Deriva da [plan.md](plan.md). Si spunta man mano.
 
 - 2026-10-02 — creato all'introduzione del passo *tasks* (emendamento della costituzione) dai passi del plan; stato e
   spunte riflettono il lavoro già svolto.
+- 2026-10-02 — change chiusa su conferma dell'utente (T13).
