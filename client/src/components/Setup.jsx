@@ -74,7 +74,7 @@ function IpList({ d, k, setD }) {
       <input
         type="text"
         value={text}
-        placeholder="es. 192.168.1.20, 192.168.1.21"
+        placeholder="es. 192.0.2.20, 192.0.2.21"
         onChange={(e) => setText(e.target.value)}
         onBlur={() => setD(set(d, `${k}.allowedIps`, parseIps(text)))}
       />

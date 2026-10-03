@@ -139,7 +139,7 @@ Le misure sono in [tech-requirements.md](tech-requirements.md); l'analisi è nel
 | Auth & permissions | di default solo dal PC locale; dalla rete solo con `SIM_TOKEN`, chiesto dalla UI una volta per sessione. Porte dei canali in TCP server: solo locale, oppure dalla rete con un elenco di IP ammessi (costituzione § 2). Nessun utente o ruolo |
 | Hosting & deployment | `npm run prod` sul PC di collaudo; procedura nel README |
 | Cloud & compute | non applicabile: il simulatore deve stare nella rete dei software da collaudare |
-| CI/CD & version control | git + GitHub Actions: verifica del percorso, test, build, controllo delle vulnerabilità |
+| CI/CD & version control | git + GitHub Actions con permessi di sola lettura: verifica del percorso, controllo dei contenuti pubblicabili, test, build, controllo delle vulnerabilità. Repository pubblico con licenza MIT; `main` protetto (solo PR con CI verde) |
 | Security & RLS | origine del WebSocket controllata, intestazioni di sicurezza e CSP, limite di dimensione dei messaggi. RLS non applicabile (nessun database) |
 | Rate limiting | al massimo 50 comandi al secondo per connessione, chiusura dopo 10 s di abuso, al massimo 10 connessioni; canali in TCP server: al massimo 5 client, dati in arrivo scartati, client che non leggono disconnessi |
 | Caching & CDN | file della UI con cache lunga e immutabile, `index.html` sempre rivalidato. CDN non applicabile |

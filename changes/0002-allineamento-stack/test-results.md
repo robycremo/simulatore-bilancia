@@ -23,7 +23,7 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 | Avvio senza variabili → solo `localhost` | `app.test` › di default ascolta solo su 127.0.0.1 | ✅ |
 | `HOST=0.0.0.0` senza token → non parte, messaggio, codice ≠ 0 | `app.test` › errore di configurazione + lanciatore esce con 1 | ✅ |
 | Token remoto: richiesto, sbagliato → chiusura e log, giusto → funziona | `app.test` › client remoto (connessione dall'IP di rete del PC) | ✅ |
-| … dalla UI di un altro PC | manuale: browser su `http://<ip>:3000` con `HOST=0.0.0.0 SIM_TOKEN=…` → richiesta del token mostrata; prova dell'utente: token sbagliato → "Token non valido", token giusto → simulatore. Log: `auth_denied` da 10.152.0.172 alle 14:21:53, `auth_ok` alle 14:21:58 (UTC) | ✅ |
+| … dalla UI di un altro PC | manuale: browser su `http://<ip>:3000` con `HOST=0.0.0.0 SIM_TOKEN=…` → richiesta del token mostrata; prova dell'utente: token sbagliato → "Token non valido", token giusto → simulatore. Log: `auth_denied` da 192.0.2.10 alle 14:21:53, `auth_ok` alle 14:21:58 (UTC) | ✅ |
 | **API e validazione** | | |
 | `setLoad` non numerico → errore, carico invariato | `app.test` + `validate.test` | ✅ |
 | Comando inesistente → errore, stato invariato | `app.test` + `validate.test` | ✅ |

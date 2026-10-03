@@ -27,3 +27,10 @@ Regole complete in [changes/README.md](changes/README.md).
 - `npm test` — test (`node:test`); i test su intestazioni e cache richiedono la build
 - `npm run listen -- 9100 tcp ack` — ricevitore da riga di comando
 - `npm run check:flow` — verifica struttura e stati delle change
+- `npm run check:public` — verifica che i file siano pubblicabili (il repository è pubblico)
+
+## Repository pubblico
+
+- Negli esempi usa solo IP di documentazione (`192.0.2.x`, `198.51.100.x`, `203.0.113.x`) o di loopback, mai IP reali.
+- Non citare il documento da cui è stato ricavato il formato delle stringhe: il riferimento è `spec.md` § 6.
+- Non scrivere token, password o dati personali in file, commit, PR o issue.

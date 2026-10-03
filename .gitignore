@@ -20,3 +20,6 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# elenco locale dei valori da non pubblicare (change 0004)
+scripts/public-check.local.txt

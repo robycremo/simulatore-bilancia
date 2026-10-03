@@ -48,6 +48,8 @@
 | `client/src/hooks/useEngine.js` | Frontend | WebSocket con riconnessione, token, errori, invii del carico limitati |
 | `client/src/components/*` | Frontend | display, comandi, pannelli, setup, `ErrorBoundary`, `Toast`, `TokenPrompt` |
 | `test/*.test.js` | CI | unitari ed end-to-end su istanze reali (`createApp`) |
+| `scripts/check-flow.mjs` | CI | struttura e stati delle change |
+| `scripts/check-public.mjs` | CI, Security | contenuti pubblicabili: IP solo di loopback o di documentazione (RFC 5737), nessun rimando al documento d'origine del formato, elenco locale dei valori riservati (`scripts/public-check.local.txt`, ignorato da git) |
 
 ## Fasi del ciclo
 
@@ -63,6 +65,7 @@
 | `npm run prod` | `build` + `start` |
 | `npm test` | test automatici (`node:test`) |
 | `npm run check:flow` | verifica la struttura e gli stati delle change |
+| `npm run check:public` | verifica che i file siano pubblicabili; `-- --history` controlla anche tutti i commit con l'elenco locale |
 
 ## Storico delle change
 
@@ -71,3 +74,4 @@
 | [0001-simulatore-iniziale](changes/0001-simulatore-iniziale/plan.md) | completato |
 | [0002-allineamento-stack](changes/0002-allineamento-stack/test-results.md) | completato |
 | [0003-modalita-server-tcp](changes/0003-modalita-server-tcp/test-results.md) | completato |
+| [0004-pubblicazione-open-source](changes/0004-pubblicazione-open-source/tasks.md) | in corso |

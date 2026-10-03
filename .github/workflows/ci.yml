@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+# La CI legge soltanto il repository: nessun permesso di scrittura per il token del workflow.
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,6 +32,9 @@ jobs:
           else
             npm run check:flow
           fi
+
+      - name: Contenuti pubblicabili (check-public)
+        run: npm run check:public
 
       # La build precede i test: i test su intestazioni e cache servono la UI compilata.
       - run: npm run build

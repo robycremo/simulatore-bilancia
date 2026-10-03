@@ -70,7 +70,7 @@ describe('modalità TCP server (0003)', () => {
 
   test('nuovi valori e campi validi', () => {
     assert.equal(check((c) => server(c)).ok, true);
-    assert.equal(check((c) => (server(c), (c.pc.access = 'network'), (c.pc.allowedIps = ['10.152.0.172', '192.168.1.20']))).ok, true);
+    assert.equal(check((c) => (server(c), (c.pc.access = 'network'), (c.pc.allowedIps = ['192.0.2.10', '198.51.100.20']))).ok, true);
     assert.equal(check((c) => (server(c, 'pc', 4001), server(c, 'fom', 4002))).ok, true);
   });
 
@@ -78,17 +78,17 @@ describe('modalità TCP server (0003)', () => {
     assert.equal(check((c) => (c.pc.proto = 'tcp-client')).ok, false);
     assert.equal(check((c) => (c.pc.access = 'internet')).ok, false);
     assert.equal(check((c) => delete c.pc.access).ok, false);
-    assert.equal(check((c) => (c.pc.allowedIps = '10.0.0.1')).ok, false);
+    assert.equal(check((c) => (c.pc.allowedIps = '203.0.113.1')).ok, false);
   });
 
   test('indirizzi IPv4: formato, duplicati, massimo 20', () => {
-    for (const ip of ['10.0.0.256', '01.2.3.4', '1.2.3', '1.2.3.4.5', 'a.b.c.d', ' 1.2.3.4', '::1']) {
+    for (const ip of ['10.0.0.256', '01.2.3.4', '1.2.3', '198.51.100.4.5', 'a.b.c.d', ' 198.51.100.4', '::1']) {
       assert.equal(check((c) => (c.pc.allowedIps = [ip])).ok, false, ip);
     }
     assert.equal(check((c) => (c.pc.allowedIps = ['0.0.0.0', '255.255.255.255'])).ok, true);
-    assert.equal(check((c) => (c.pc.allowedIps = ['1.2.3.4', '1.2.3.4'])).ok, false);
-    assert.equal(check((c) => (c.pc.allowedIps = Array.from({ length: 20 }, (_, i) => `10.0.0.${i}`))).ok, true);
-    assert.equal(check((c) => (c.pc.allowedIps = Array.from({ length: 21 }, (_, i) => `10.0.0.${i}`))).ok, false);
+    assert.equal(check((c) => (c.pc.allowedIps = ['198.51.100.4', '198.51.100.4'])).ok, false);
+    assert.equal(check((c) => (c.pc.allowedIps = Array.from({ length: 20 }, (_, i) => `203.0.113.${i}`))).ok, true);
+    assert.equal(check((c) => (c.pc.allowedIps = Array.from({ length: 21 }, (_, i) => `203.0.113.${i}`))).ok, false);
   });
 
   test('controlli tra campi', () => {
