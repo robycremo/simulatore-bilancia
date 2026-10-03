@@ -1,6 +1,6 @@
 # 0004 — Pubblicazione open source · Requisiti tecnici
 
-> Stato: approvato
+> Stato: completato
 
 Vincoli tecnici misurabili. Derivano da [spec.md](spec.md) e dalla [costituzione](../../constitution.md).
 
@@ -102,3 +102,4 @@ integrato dell'ambiente di sviluppo.
   aggiunti i requisiti della riscrittura (TR-6…TR-12). Tolti dai documenti della 0004 i valori precisi da cercare,
   che ora stanno solo nell'elenco locale ignorato da git (TR-3).
 - 2026-10-02 — approvati dall'utente.
+- 2026-10-03 — change chiusa su conferma dell'utente (T22): repository pubblico, protezioni attive.

@@ -1,6 +1,6 @@
 # 0004 — Pubblicazione open source · Plan
 
-> Stato: approvato
+> Stato: completato
 
 Deriva da [spec.md](spec.md) e [tech-requirements.md](tech-requirements.md). Come nei requisiti, questo documento
 **non contiene i valori precisi** da togliere: stanno solo nell'elenco locale ignorato da git (TR-3).
@@ -149,3 +149,4 @@ README.md                           riscritto in inglese
 - 2026-10-02 — creata vuota, in attesa del documento precedente.
 - 2026-10-02 — scritto dopo l'approvazione dei requisiti tecnici.
 - 2026-10-02 — approvato dall'utente.
+- 2026-10-03 — change chiusa su conferma dell'utente (T22): repository pubblico, protezioni attive.

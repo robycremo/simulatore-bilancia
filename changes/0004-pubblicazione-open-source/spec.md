@@ -1,6 +1,6 @@
 # 0004 — Pubblicazione open source · Spec
 
-> Stato: approvato
+> Stato: completato
 
 Deriva da [intent.md](intent.md). Descrive ciò che deve risultare osservabile nel repository pubblico. Il comportamento
 del simulatore e il formato delle stringhe non cambiano.
@@ -119,3 +119,4 @@ Dopo la pubblicazione si verifica, senza autenticazione, che pagina, README, lic
 - 2026-10-02 — **ritorno alla spec** (dopo il ritorno all'intent): riferimenti al documento d'origine tolti da tutti i
   commit; IP ed email restano nei vecchi commit; repository attuale rinominato e privato, nuovo repository con la
   storia riscritta. § 1 e criteri di riservatezza aggiornati.
+- 2026-10-03 — change chiusa su conferma dell'utente (T22): repository pubblico, protezioni attive.
