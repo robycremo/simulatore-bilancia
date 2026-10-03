@@ -5,7 +5,7 @@ import { DEFAULT_CONFIG } from '../server/domain/engine.js';
 
 const cfg = { ...DEFAULT_CONFIG, prefix: '$', checksum: 'none', division: 0.1, unit: 'kg', decimalSep: ',' };
 
-// Pesata di esempio (valori di fantasia): 15/06/2026 10:30:00, progressivo 42, netto 237,5 kg.
+// Pesata di esempio (valori di fantasia): 15/06/2026 10:30:00, progressivo 42, lordo 250,0 kg, tara 12,5 kg, netto 237,5 kg.
 const rec = {
   date: '15/06/2026',
   time: '10:30:00',
@@ -14,8 +14,8 @@ const rec = {
   desc: '',
   cgen: '',
   result: 0,
-  gross: 237.5,
-  tare: 0,
+  gross: 250,
+  tare: 12.5,
   net: 237.5,
   mpp: 42,
 };
@@ -30,8 +30,8 @@ const FIELDS = [
   ['descrizione', 31, 20, ' '.repeat(20)],
   ['codice generico', 51, 8, ' '.repeat(8)],
   ['risultato', 59, 8, '       0'],
-  ['lordo', 67, 12, '    237,5 kg'],
-  ['tara', 79, 12, '      0,0 kg'],
+  ['lordo', 67, 12, '    250,0 kg'],
+  ['tara', 79, 12, '     12,5 kg'],
   ['netto', 91, 12, '    237,5 kg'],
 ];
 
@@ -46,7 +46,7 @@ test('stringa pesata: 104 caratteri, campo per campo come da formato', () => {
 
 test('stringa pesata: corrisponde all\'esempio di riferimento', () => {
   const manual =
-    '15/06/202610:30:00    42     0' + ' '.repeat(28) + '       0    237,5 kg      0,0 kg    237,5 kg';
+    '15/06/202610:30:00    42     0' + ' '.repeat(28) + '       0    250,0 kg     12,5 kg    237,5 kg';
   assert.equal(buildWeighString(rec, cfg), '$' + manual + '\r');
 });
 

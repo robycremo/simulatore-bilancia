@@ -22,7 +22,7 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 | Client collegato dopo una pesata riceve solo le successive | `serverChannel.test` | ✅ |
 | Due client ricevono la stringa; il sesto viene disconnesso | `serverChannel.test` | ✅ |
 | Testo scritto dal client non cambia lo stato né causa errori | `serverChannel.test` (20 KB di testo dal client) | ✅ |
-| Client terminato bruscamente → rimosso; poi `NESSUN CLIENT` | `serverChannel.test` (chiusura del socket); prove dell'utente: chiusure di PuTTY registrate come `server_client_disconnect` (es. 15:47:21 da `200.0.0.193`), seguite da `tx_error` `NESSUN CLIENT` alle pesate senza client | ✅ |
+| Client terminato bruscamente → rimosso; poi `NESSUN CLIENT` | `serverChannel.test` (chiusura del socket); prove dell'utente: chiusure di PuTTY registrate come `server_client_disconnect` (es. 15:47:21 da `192.0.2.20`), seguite da `tx_error` `NESSUN CLIENT` alle pesate senza client | ✅ |
 | Porta occupata → errore visibile, poi in ascolto entro 5 s | `serverChannel.test` | ✅ |
 | Cambio porta nel setup → vecchia porta chiusa, nuova attiva | `serverChannel.test` (ChannelManager) + `app.test` | ✅ |
 | **Esiti** | | |
@@ -33,7 +33,7 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire.
 | MPP senza client → contatto `ERRORE TRASM PC` circa 1 s | stesso percorso d'esito di STD (`NESSUN CLIENT` = errore) già coperto; revisione di `executeMpp` | ✅ |
 | **Accesso** | | |
 | Accesso `solo questo PC` → connessione dall'IP di rete rifiutata, nessuna riga nel log (criterio corretto, vedi *Problemi* § 2) | `serverChannel.test` (rifiuto e assenza di `server_client_refused`); prova dell'utente da un secondo PC: "connection refused" | ✅ |
-| Accesso `rete`: IP ammesso accettato; IP non in elenco rifiutato e registrato | `serverChannel.test` (IP di rete del PC); prova dell'utente con PuTTY dal secondo PC `200.0.0.193`: prima di inserirlo negli IP ammessi tre tentativi chiusi subito con `server_client_refused` motivo `ip` (15:45:26–15:45:51 UTC); dopo l'inserimento connessione accettata (15:46:49) e stringhe ricevute. Accettato anche `10.152.0.172` in elenco | ✅ |
+| Accesso `rete`: IP ammesso accettato; IP non in elenco rifiutato e registrato | `serverChannel.test` (IP di rete del PC); prova dell'utente con PuTTY dal secondo PC `192.0.2.20`: prima di inserirlo negli IP ammessi tre tentativi chiusi subito con `server_client_refused` motivo `ip` (15:45:26–15:45:51 UTC); dopo l'inserimento connessione accettata (15:46:49) e stringhe ricevute. Accettato anche `192.0.2.10` in elenco | ✅ |
 | Accesso `rete` con elenco vuoto o IP non valido → setup rifiutato | `validate.test`; manuale nel browser: notifica "con accesso "rete" serve almeno un IP ammesso" | ✅ |
 | **Visibilità** | | |
 | Display, setup, scheda Trasmissioni e `/api/health` | manuale nel browser: display `PC: 1 client`, setup `IN ASCOLTO TCP 4001 · 0 client collegati`, Trasmissioni `INVIATO · 1 client`; `app.test` per `/api/health` | ✅ |

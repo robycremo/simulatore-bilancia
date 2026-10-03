@@ -11,7 +11,7 @@ import { freePort, waitUntil, sleep } from './helpers.js';
 const ACK = '\x06';
 const NAK = '\x15';
 const PAYLOAD = buildWeighString(
-  { date: '15/06/2026', time: '10:30:00', prog: 42, code: 0, desc: '', cgen: '', result: 0, gross: 237.5, tare: 0, net: 237.5 },
+  { date: '15/06/2026', time: '10:30:00', prog: 42, code: 0, desc: '', cgen: '', result: 0, gross: 250, tare: 12.5, net: 237.5 },
   DEFAULT_CONFIG
 );
 
@@ -56,14 +56,14 @@ afterEach(async () => {
 
 describe('funzioni di supporto', () => {
   test('normalizzazione e controllo degli indirizzi', () => {
-    assert.equal(normalizeAddress('::ffff:10.0.0.5'), '10.0.0.5');
+    assert.equal(normalizeAddress('::ffff:203.0.113.5'), '203.0.113.5');
     assert.equal(isAllowed('127.0.0.1', 'local', []), true);
     assert.equal(isAllowed('::ffff:127.0.0.1', 'local', []), true);
     assert.equal(isAllowed('::1', 'local', []), true);
-    assert.equal(isAllowed('10.0.0.5', 'local', ['10.0.0.5']), false);
-    assert.equal(isAllowed('::ffff:10.0.0.5', 'network', ['10.0.0.5']), true);
-    assert.equal(isAllowed('10.0.0.6', 'network', ['10.0.0.5']), false);
-    assert.equal(isAllowed('127.0.0.1', 'network', ['10.0.0.5']), false, 'in rete vale solo l\'elenco (TR-7)');
+    assert.equal(isAllowed('203.0.113.5', 'local', ['203.0.113.5']), false);
+    assert.equal(isAllowed('::ffff:203.0.113.5', 'network', ['203.0.113.5']), true);
+    assert.equal(isAllowed('203.0.113.6', 'network', ['203.0.113.5']), false);
+    assert.equal(isAllowed('127.0.0.1', 'network', ['203.0.113.5']), false, 'in rete vale solo l\'elenco (TR-7)');
   });
 
   test('client lento: disconnesso oltre 64 KB in attesa (socket finto)', () => {
@@ -128,7 +128,7 @@ describe('ascolto e accettazione (T4)', () => {
     client(allowed.port, { host: lan });
     await connected(allowed, 1);
 
-    const denied = await channel({ access: 'network', allowedIps: ['10.255.255.254'] });
+    const denied = await channel({ access: 'network', allowedIps: ['203.0.113.254'] });
     const c = client(denied.port, { host: lan });
     assert.ok(await waitUntil(() => c.closed, 2000));
     assert.equal(denied.clients.size, 0);

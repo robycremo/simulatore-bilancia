@@ -1,175 +1,141 @@
-# Simulatore bilancia
+# Weighing terminal simulator
 
-Simulatore di terminale di pesatura (Node.js + React) che invia la stringa peso su IP (TCP/UDP, ACK/NAK opzionale).
-Serve a collaudare i software che ricevono le pesate (PC, FOM) senza la bilancia fisica.
+🇬🇧 English · 🇮🇹 [Versione italiana](README.it.md)
 
-## Avvio rapido
+[![CI](https://github.com/robycremo/simulatore-bilancia/actions/workflows/ci.yml/badge.svg)](https://github.com/robycremo/simulatore-bilancia/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+![Node.js ≥ 22](https://img.shields.io/badge/node-%E2%89%A5%2022-339933?logo=node.js&logoColor=white)
+
+**Test the software that receives weighings — without a scale on your desk.**
+
+The simulator behaves like an industrial weighing terminal: you put a load on the virtual platform, it waits for a
+stable weight, prints a ticket and sends the weight string to the PC and to a second system (FOM) over the network,
+exactly as the real terminal would. Every failure case — printer out of paper, NAK from the receiver, nobody
+listening — can be reproduced on demand, in seconds.
+
+![The simulator: terminal display, keypad and printer ticket](docs/images/screenshot.png)
+
+> The user interface and the in-depth documentation are in Italian: the simulator was built for an Italian plant.
+> This page gives you everything you need to run it and to understand how it is made.
+
+## Features
+
+- **Faithful weighing cycle** — threshold or photocell trigger, stability wait with timeout, tare and zero, standard
+  and *MPP* (archive) modes, end-of-batch, totals and progressive counter.
+- **Real strings on the wire** — fixed 104-character record (106 with checksum: none, XOR or sum mod 256), sent over
+  **TCP client**, **UDP** or **TCP server** (clients such as PuTTY connect to the simulator), with optional
+  **ACK/NAK** handshake and retries.
+- **Error injection** — printer disconnected or out of paper, NAK or silent receiver, no client connected; error
+  outputs light up as on the real terminal.
+- **Built-in test receivers** that answer ACK, NAK or nothing, plus a command-line receiver.
+- **Safe by default** — listens on `127.0.0.1` only; network access requires a token (web UI) or an explicit IP
+  allow-list (TCP server ports); every command is validated and rate-limited.
+- **Operable** — atomic state saving with automatic recovery, daily JSON logs, `/api/health`, graceful shutdown.
+
+## Quick start
+
+Requires **Node.js 22 or newer**.
 
 ```bash
+git clone https://github.com/robycremo/simulatore-bilancia.git
+cd simulatore-bilancia
 npm ci
 npm run prod
 ```
 
-Aprire http://localhost:3000. In sviluppo: `npm run dev` (UI su http://localhost:5173 con ricaricamento automatico).
+Open <http://localhost:3000>, drag the load slider above the threshold and watch the ticket print and the string
+appear in the *Ricevitori test* (test receivers) tab.
 
-## Installazione su PC di collaudo
+| Command | What it does |
+|---|---|
+| `npm run prod` | build the UI and start the simulator on port 3000 |
+| `npm run dev` | development mode with hot reload (UI on port 5173) |
+| `npm test` | run the automated test suite |
+| `npm run listen -- 9100 tcp ack` | stand-alone receiver that prints every string it gets |
 
-### Requisiti
+Environment variables: `PORT` (default `3000`), `HOST` (default `127.0.0.1`; `0.0.0.0` to open the web UI to other
+PCs) and `SIM_TOKEN` (required whenever `HOST` is not local).
 
-- Windows 10/11 (o Linux), **Node.js 22 o successivo** (https://nodejs.org, versione LTS).
-- Porte libere: **3000** (interfaccia), **9100** e **9101** (ricevitori di test PC e FOM), **4001**/**4002** se i
-  canali sono in modalità TCP server, più quelle dei sistemi da collaudare indicate nel setup.
+## Receiving strings with PuTTY
 
-### Installazione
+1. In **Setup → 7) Trasmissione a PC**, set *Protocollo* to **TCP server** (port **4001** is suggested) and save.
+2. In PuTTY: host `127.0.0.1`, port `4001`, connection type **Raw**.
+3. Every weighing now shows up in PuTTY as a 104-character line.
 
-1. Copiare la cartella del progetto sul PC (o clonare il repository).
-2. In un terminale (PowerShell) nella cartella del progetto:
+Up to 5 clients per channel receive the same strings. To connect from another PC, set *Accesso* to *rete* and list
+the allowed IP addresses (for example `192.0.2.20`). Without a connected client the transmission counts as failed —
+just like a receiving PC that is switched off.
 
-   ```powershell
-   npm ci
-   ```
+## Architecture
 
-### Avvio
-
-```powershell
-npm run prod
+```text
+ Browser (React)                    server/
+   client/src  ──WebSocket /ws──►  api/ws.js ──(validate)──►  domain/engine.js
+               ◄── state 10 Hz ──                                │
+               ──HTTP──────────►  api/http.js (UI, health)       ├─► transport/channels.js ─┬─► net.js ───────► PC / FOM (TCP client, UDP)
+                                                                 │                          └─► serverChannel.js ◄── PC / FOM / PuTTY (TCP server)
+                                                                 ├─► transport/receiver.js ◄── built-in test receivers
+                                                                 ├─► storage/jsonStore.js    data/*.json
+                                                                 └─► observability/logger.js data/logs/
 ```
 
-Compila l'interfaccia e avvia il simulatore; nel terminale compare l'indirizzo da aprire nel browser.
-Per fermarlo: **Ctrl+C** nel terminale (lo stato viene salvato). Alle accensioni successive basta `npm start`.
+- The **engine** is the single source of truth (weight model, weighing cycle, printer, totals); the React UI is only
+  a view that sends commands.
+- Each layer of a production stack has its own folder: `config`, `api`, `domain`, `transport`, `storage`,
+  `observability`. The domain never sees the network, access rules or limits — it receives validated commands only.
+- No runtime dependencies beyond `express` and `ws`: validation, rate limiting, logging and the TCP server are small
+  in-house modules.
 
-Messaggi all'avvio:
+## How it's built: spec-driven development
 
-| Messaggio | Causa e rimedio |
-|---|---|
-| `La porta 3000 è già in uso` | il simulatore è già avviato, oppure un altro programma usa la porta: chiuderlo o usare `PORT` |
-| `Errore di configurazione: HOST=… impostare anche SIM_TOKEN` | si è chiesto l'accesso dalla rete senza token (vedi sotto) |
+This repository is also an example of **spec-driven development** carried out end to end, with an AI pair
+programmer and a human approving every step.
 
-### Variabili d'ambiente
+A [**constitution**](constitution.md) sets the rules — architecture principles, security, engineering practices,
+quality standards, technology constraints, business guardrails. Every change then follows the same path, one
+approved document at a time:
 
-| Variabile | Default | Significato |
+```text
+intent → spec → tech-requirements → plan → tasks → code → test-results → PR
+  ↑                                                                    │
+  └────────────────────────── go back when needed ─────────────────────┘
+```
+
+| # | Document | Question it answers |
 |---|---|---|
-| `PORT` | `3000` | porta dell'interfaccia |
-| `HOST` | `127.0.0.1` | interfaccia di ascolto della **pagina web**; `0.0.0.0` per aprirla da altri PC. Non riguarda le porte dei canali in TCP server (vedi *Uso con PuTTY*) |
-| `SIM_TOKEN` | — | token di accesso, **obbligatorio** se `HOST` non è locale |
+| 1 | `intent.md` | What do we want, and why? |
+| 2 | `spec.md` | What must the system do? (observable behaviour, acceptance criteria) |
+| 3 | `tech-requirements.md` | Which measurable technical constraints apply? |
+| 4 | `plan.md` | How will we build it? |
+| 5 | `tasks.md` | What concrete work is needed? |
+| 7 | `test-results.md` | Does it satisfy the spec and the requirements? Every criterion, with its evidence |
 
-In PowerShell valgono per il terminale in cui vengono impostate:
+The full history is in [`changes/`](changes/README.md):
 
-```powershell
-$env:PORT="3100"; npm start
-```
-
-### Accesso da un altro PC
-
-```powershell
-$env:HOST="0.0.0.0"; $env:SIM_TOKEN="scegliere-un-token"; npm start
-```
-
-Dall'altro PC aprire `http://<ip-del-pc-simulatore>:3000`: l'interfaccia chiede il token una volta per sessione del
-browser. Al primo avvio Windows può chiedere di consentire Node.js nel firewall: autorizzare solo le **reti private**.
-Il token non va scritto in file del progetto; chiudere il terminale a fine uso.
-
-### Dati, log e diagnostica
-
-| Percorso | Contenuto |
+| Change | What it delivered |
 |---|---|
-| `data/config.json` | setup del terminale (con copia `.bak` della versione precedente) |
-| `data/state.json` | progressivo, totali, archivio MPP (con copia `.bak`) |
-| `data/logs/simulatore-AAAA-MM-GG.log` | log giornaliero, una riga JSON per evento; conservato 14 giorni |
-| `http://localhost:3000/api/health` | stato del simulatore e dei ricevitori di test |
+| [0001 — initial simulator](changes/0001-simulatore-iniziale/intent.md) | weighing cycle, setup, strings, printer, test receivers |
+| [0002 — production stack](changes/0002-allineamento-stack/intent.md) | each of the 13 stack layers covered or explicitly ruled out: auth, validation, rate limiting, atomic storage, logs, health, CI |
+| [0003 — TCP server mode](changes/0003-modalita-server-tcp/intent.md) | channels that listen for clients such as PuTTY, with IP allow-list |
+| [0004 — open-source release](changes/0004-pubblicazione-open-source/intent.md) | this public repository: licensing, security settings, documentation |
 
-Se `config.json` o `state.json` risultano danneggiati, all'avvio vengono rinominati `*.corrupt-<data-ora>` e il
-simulatore riparte dalla copia `.bak` o dai valori di default; il log lo segnala con l'evento `storage_recovered`.
+Each `test-results.md` also records the defects found along the way and the times the process went back to an
+earlier document — the parts that usually stay invisible. `npm run check:flow` (also in CI) verifies that every change
+has its six documents and that their statuses respect the order.
 
-Eventi utili da cercare nel log: `weighing` (ogni pesata), `tx_error` (trasmissione fallita), `printer_fault`,
-`auth_denied` (accesso rifiutato), `client_error` (errore dell'interfaccia).
+## Testing & CI
 
-### Ricevitore da riga di comando
+- **80+ automated tests** with `node:test`: unit tests plus end-to-end tests on real server instances (random ports,
+  temporary data folders) covering the weighing cycle, ACK/NAK, access control, rate limiting, storage recovery and
+  TCP server mode.
+- **GitHub Actions** on every push and pull request: process check, publishable-content check, build, tests and
+  `npm audit` (fails on high-severity vulnerabilities).
 
-Per guardare le stringhe da un altro PC, o al posto dei ricevitori integrati (prima fermare quello sulla stessa porta
-dalla scheda *Ricevitori test*):
+## Security
 
-```powershell
-npm run listen -- 9100 tcp ack
-```
+The simulator is a **testing tool** for workstations and trusted networks, not an Internet-facing service. See
+[SECURITY.md](SECURITY.md) for supported versions and how to report a vulnerability privately.
 
-Argomenti: porta, `tcp` o `udp`, risposta `ack`, `nak` o `none`.
+## License
 
-### Uso con PuTTY (modalità TCP server)
-
-Di default il simulatore apre lui la connessione verso PC e FOM (TCP client). Per collegarsi **al** simulatore con
-PuTTY o con un software che si aspetta una bilancia in ascolto, il canale va messo in modalità **TCP server**:
-
-1. **Setup** → *7) Trasmissione a PC* (o FOM) → *Protocollo* = **TCP server**. Viene proposta la porta **4001**
-   (PC) o **4002** (FOM); *Salva setup*. Lo stato del canale deve diventare `IN ASCOLTO TCP 4001`.
-2. In PuTTY: *Host Name* `127.0.0.1`, *Port* `4001`, *Connection type* **Raw** → *Open*.
-3. A ogni pesata PuTTY mostra la stringa (104 caratteri, 106 con checksum, terminata da CR). Sul display compare
-   `PC: 1 client`.
-
-Comportamento:
-- fino a **5 client** per canale ricevono tutti le stesse stringhe; ciascuno riceve solo quelle successive al
-  collegamento;
-- quello che si scrive in PuTTY viene ignorato (salvo i caratteri ACK/NAK se il protocollo ACK/NAK è attivo);
-- **nessun client collegato** = trasmissione fallita (`NESSUN CLIENT`): uscita di errore e, per il FOM con
-  *totalizza solo con FOM corretta*, pesata non totalizzata, come per un PC irraggiungibile.
-
-**Da un altro PC.** Con *Accesso* = "solo questo PC" (default) la porta non è raggiungibile dalla rete: PuTTY da un
-altro PC riceve **"connection refused"** e nel log non resta nulla. Per collegarsi dalla rete:
-
-1. *Accesso* = **rete (IP ammessi)** e in *IP ammessi* gli indirizzi dei PC autorizzati (separati da virgola, al
-   massimo 20); *Salva setup*.
-2. Al primo ascolto Windows può chiedere il permesso del firewall per Node.js: autorizzare solo le **reti private**.
-3. Dall'altro PC: PuTTY *Raw* su `<ip-del-pc-simulatore>:4001`.
-
-Un PC non in elenco viene disconnesso subito e il log registra `server_client_refused` con motivo `ip`.
-
-> `HOST=0.0.0.0` serve solo ad aprire la **pagina web** da altri PC: non apre le porte dei canali, che dipendono
-> esclusivamente da *Accesso* e *IP ammessi* nel setup.
-
-## Tasti rapidi
-
-F2 stampa · F3 fotocellula · F4 fine partita · F5 stampante on/off · F6 STD/MPP · F7 zero · F8 tara
-
-## Come si modifica il progetto
-
-Il progetto segue lo Spec Driven Development, con le regole della [costituzione](constitution.md):
-
-```text
-intent → spec → tech-requirements → plan → tasks → codice → test-results → PR
-```
-
-I documenti vivi sono [intent.md](intent.md), [spec.md](spec.md), [tech-requirements.md](tech-requirements.md) e
-[plan.md](plan.md); ogni modifica ha la sua cartella in [changes/](changes/README.md) con i sei documenti.
-`npm run check:flow` (eseguito anche in CI) verifica che il percorso sia rispettato.
-
-| Comando | Effetto |
-|---|---|
-| `npm run dev` | server con riavvio automatico + Vite su :5173 |
-| `npm run build` | compila l'interfaccia in `client/dist` |
-| `npm start` | avvia il simulatore con l'interfaccia compilata |
-| `npm run prod` | `build` + `start` |
-| `npm test` | test automatici (i test su intestazioni e cache richiedono la build) |
-| `npm run check:flow` | verifica struttura e stati delle change |
-
-## Struttura
-
-```text
-server/
-  index.js                 avvio: variabili d'ambiente, segnali di arresto, errori non gestiti
-  app.js                   composizione: storage + log + motore + HTTP + WebSocket (createApp)
-  config/env.js            PORT, HOST, SIM_TOKEN
-  api/                     HTTP (sicurezza, cache, health), WebSocket (token, limiti), validazione comandi
-  domain/                  motore di pesatura (engine.js), stringhe e checksum (format.js)
-  transport/               canali PC/FOM (TCP client, UDP, TCP server) con ACK/NAK, ricevitori di test,
-                           ricevitore da riga di comando
-  storage/jsonStore.js     salvataggio atomico con .bak e recupero
-  observability/logger.js  log JSON giornalieri
-client/src/
-  hooks/useEngine.js       connessione al motore, token, invii limitati del carico
-  components/              display, comandi, pannelli, setup, errori, richiesta token
-test/                      test node:test (unitari ed end-to-end)
-data/                      setup, stato e log (non versionato)
-changes/                   una cartella per ogni modifica (sei documenti)
-scripts/check-flow.mjs     verifica del percorso
-.github/                   CI e modello di pull request
-```
+[MIT](LICENSE) © 2026 robycremo

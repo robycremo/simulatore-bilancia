@@ -64,3 +64,5 @@
 - 2026-10-02 — § 2: accesso dalla rete alle porte TCP server dei canali con elenco esplicito di IP ammessi, al posto
   del token che una connessione TCP grezza non può presentare; invio delle stringhe anche ai client ammessi
   collegati in modalità TCP server (change 0003, spec approvata).
+- 2026-10-03 — § 6: la fedeltà è al formato definito nella spec (`spec.md` § 6), unico riferimento per il tracciato
+  delle stringhe; il testo è stato allineato anche nella storia del repository (change 0004).
