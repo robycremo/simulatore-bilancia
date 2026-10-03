@@ -74,4 +74,4 @@
 | [0001-simulatore-iniziale](changes/0001-simulatore-iniziale/plan.md) | completato |
 | [0002-allineamento-stack](changes/0002-allineamento-stack/test-results.md) | completato |
 | [0003-modalita-server-tcp](changes/0003-modalita-server-tcp/test-results.md) | completato |
-| [0004-pubblicazione-open-source](changes/0004-pubblicazione-open-source/tasks.md) | in corso |
+| [0004-pubblicazione-open-source](changes/0004-pubblicazione-open-source/test-results.md) | completato |

@@ -1,6 +1,6 @@
 # 0004 — Pubblicazione open source · Tasks
 
-> Stato: in corso
+> Stato: completato
 
 Deriva da [plan.md](plan.md). Ordine di esecuzione; ogni task si chiude con la sua verifica. Tra parentesi i requisiti
 tecnici coperti. Nessun valore preciso da togliere compare in questo file (regola dei requisiti tecnici).
@@ -41,23 +41,23 @@ tecnici coperti. Nessun valore preciso da togliere compare in questo file (regol
 
 ## Fase C — Repository su GitHub (ancora privato)
 
-- [ ] **T14. Rinomina.** `gh repo rename simulatore-bilancia-privato`; verifica che sia privato e conservi PR e CI
+- [x] **T14. Rinomina.** `gh repo rename simulatore-bilancia-privato`; verifica che sia privato e conservi PR e CI
       (TR-12).
-- [ ] **T15. Nuovo repository.** `gh repo create robycremo/simulatore-bilancia --private`; push di `main` e del ramo
+- [x] **T15. Nuovo repository.** `gh repo create robycremo/simulatore-bilancia --private`; push di `main` e del ramo
       della 0004; permessi dei workflow in sola lettura; Dependabot; descrizione e topic (TR-12, TR-16, TR-17, TR-29).
-- [ ] **T16. PR e release.** PR della 0004 con il modello → CI verde → merge → tag `v1.0.0` e release con note in
+- [x] **T16. PR e release.** PR della 0004 con il modello → CI verde → merge → tag `v1.0.0` e release con note in
       inglese (TR-30).
-- [ ] **T17. Controllo finale.** Clone fresco in una cartella temporanea: `check:public --history` con l'elenco
+- [x] **T17. Controllo finale.** Clone fresco in una cartella temporanea: `check:public --history` con l'elenco
       locale, ricerca dei segreti, elenco di PR, tag e release; **resoconto all'utente e richiesta di conferma**.
 
 ## Fase D — Pubblicazione (solo dopo la conferma dell'utente)
 
-- [ ] **T18. Visibilità pubblica** (TR-31).
-- [ ] **T19. Protezioni entro 5 minuti.** Rilevamento dei segreti con blocco al push, protezione di `main`,
+- [x] **T18. Visibilità pubblica** (TR-31).
+- [x] **T19. Protezioni entro 5 minuti.** Rilevamento dei segreti con blocco al push, protezione di `main`,
       segnalazione privata delle vulnerabilità; lettura via API per conferma (TR-19…TR-22).
-- [ ] **T20. Verifica anonima.** `curl` senza credenziali su pagina, README, `LICENSE`, release → 200 (TR-32).
-- [ ] **T21. A cura dell'utente.** Caricamento dell'anteprima social; impostazioni dell'account sull'email privata.
-- [ ] **T22. Chiusura.** test-results completato (con la nota sugli hash delle change 0001–0003), documenti a
+- [x] **T20. Verifica anonima.** `curl` senza credenziali su pagina, README, `LICENSE`, release → 200 (TR-32).
+- [x] **T21. A cura dell'utente.** Caricamento dell'anteprima social; impostazioni dell'account sull'email privata.
+- [x] **T22. Chiusura.** test-results completato (con la nota sugli hash delle change 0001–0003), documenti a
       `completato`, PR di chiusura.
 
 ## Registro
@@ -84,3 +84,6 @@ tecnici coperti. Nessun valore preciso da togliere compare in questo file (regol
   Gli IP privati del test di `check:public` sono costruiti a runtime, così il file non contiene indirizzi non ammessi.
 - T10/T11: `msedge --screenshot` cattura prima che la UI si colleghi al WebSocket; usato il protocollo DevTools di Edge
   con `fetch`/`WebSocket` di Node (script temporaneo fuori dal repository), attesa del display prima della cattura.
+- T16: merge fatto in locale (`git merge --no-ff`) con l'email anonima e poi pubblicato su `main`, invece che da GitHub:
+  un merge da GitHub avrebbe usato l'email principale dell'account. GitHub ha segnato la PR come merged.
+- 2026-10-03 — change chiusa su conferma dell'utente (T22): repository pubblico, protezioni attive.

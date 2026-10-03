@@ -1,6 +1,6 @@
 # 0004 — Pubblicazione open source · Intent
 
-> Stato: approvato
+> Stato: completato
 
 ## Work item
 
@@ -67,3 +67,4 @@ Un repository pubblico che:
 - 2026-10-02 — **ritorno all'intent** durante i requisiti tecnici: l'utente ci ripensa per i riferimenti al documento d'origine,
   che vanno tolti anche dalla storia; IP ed email possono restare nei vecchi commit. Per via dei riferimenti delle PR ai
   vecchi commit, il repository attuale viene rinominato (privato, copia di riserva) e uno nuovo riceve la storia riscritta.
+- 2026-10-03 — change chiusa su conferma dell'utente (T22): repository pubblico, protezioni attive.
