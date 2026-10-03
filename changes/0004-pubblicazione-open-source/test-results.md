@@ -67,9 +67,9 @@ Legenda: ✅ superato · ❌ fallito · ⏳ da eseguire. Nessun valore preciso d
 chiusura e le esecuzioni della CI) si riferiscono alla storia precedente la riscrittura, conservata nel repository
 privato `simulatore-bilancia-privato`; nel repository pubblico gli stessi commit hanno identificativi nuovi.
 
-La prova di un push diretto su `main` non è stata fatta con un push reale, che in caso di protezione mancante sarebbe
-finito nel repository pubblico; la regola è verificata leggendola via API. Il primo rifiuto reale avverrà con il
-commit di chiusura, che passa da una PR.
+**Prova reale della protezione di `main`** (T22): il push diretto del commit di chiusura è stato rifiutato da
+GitHub con "GH006: Protected branch update failed … Changes must be made through a pull request … Required status
+check "build" is expected"; il commit è stato quindi portato su un ramo e integrato con una PR.
 
 ## Criteri di accettazione
 
