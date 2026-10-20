@@ -148,7 +148,9 @@ intent → spec → tech-requirements → plan → tasks → codice → test-res
 
 I documenti vivi sono [intent.md](intent.md), [spec.md](spec.md), [tech-requirements.md](tech-requirements.md) e
 [plan.md](plan.md); ogni modifica ha la sua cartella in [changes/](changes/README.md) con i sei documenti.
-`npm run check:flow` (eseguito anche in CI) verifica che il percorso sia rispettato.
+`npm run check:flow` (eseguito anche in CI) verifica che il percorso sia rispettato. Unica eccezione: le PR di
+Dependabot che aggiornano solo le versioni di dipendenze esistenti, senza versioni maggiori, non richiedono una change
+ma devono superare tutti gli altri controlli ([change 0005](changes/0005-aggiornamenti-dipendenze/intent.md)).
 
 | Comando | Effetto |
 |---|---|

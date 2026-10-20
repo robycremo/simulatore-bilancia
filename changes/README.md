@@ -43,7 +43,9 @@ changes/
 4. **Chiusura**: con `test-results.md` completato, le modifiche vengono riportate nei documenti vivi in radice e tutti
    i file della change passano a `completato`.
 5. **Commit e PR**: ogni commit cita la change (`[0003] ...`); la CI rifiuta modifiche al codice senza una change toccata
-   nello stesso ramo.
+   nello stesso ramo. **Unica eccezione**: le PR di Dependabot che aggiornano solo le versioni di dipendenze esistenti,
+   senza versioni maggiori ([costituzione](../constitution.md) § 3). Per loro `check:flow` scrive nel log l'eccezione
+   applicata; tutti gli altri controlli restano obbligatori.
 
 ## Stato
 
@@ -61,3 +63,8 @@ Ogni documento ha in testa una riga `> Stato: <valore>`.
 nessun documento oltre la bozza se il precedente è in bozza, `test-results` avviato solo con i tasks avviati,
 chiusura in un unico passo (`test-results` completato solo con tutti i documenti completati, e nessun documento
 tranne `tasks` completato prima).
+
+Nella CI delle pull request (`--base`) verifica anche che il codice modificato sia accompagnato da una change, salvo
+l'eccezione per Dependabot: la riconosce dall'autore della PR registrato da GitHub (variabile `PR_AUTHOR`, impostata
+solo dalla CI) e la applica solo se tutte le condizioni sono soddisfatte; altrimenti elenca i motivi
+(`scripts/dependabot-exemption.mjs`).
