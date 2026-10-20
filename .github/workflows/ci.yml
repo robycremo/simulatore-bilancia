@@ -26,6 +26,10 @@ jobs:
       - run: npm ci
 
       - name: Percorso SDD (check-flow)
+        # Autore della PR registrato da GitHub: abilita l'eccezione per Dependabot (costituzione § 3, change 0005).
+        # Sui push l'espressione è vuota e l'eccezione non si applica.
+        env:
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             npm run check:flow -- --base origin/${{ github.base_ref }}

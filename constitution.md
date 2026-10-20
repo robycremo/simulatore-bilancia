@@ -33,6 +33,11 @@
 - **Si torna indietro**: se un passo a valle contraddice uno a monte, ci si ferma, si corregge il documento a monte e
   si annota il motivo nel *Registro*. Il codice non diverge mai dai documenti.
 - **Commit e PR** citano la change (`[0003] ...`); una PR corrisponde a una change.
+- **Aggiornamenti delle dipendenze da Dependabot.** Le PR create da Dependabot che modificano solo i numeri di
+  versione di dipendenze già presenti in `package.json` e `package-lock.json`, senza cambi di versione maggiore, non
+  richiedono una change: devono comunque superare tutti i controlli della CI, e il merge resta dell'autore. Ogni altra
+  modifica alle dipendenze segue il percorso normale. L'eccezione è verificata da `check:flow` sull'autore della PR
+  registrato da GitHub.
 - Documenti, interfaccia e messaggi in **italiano**; nomi nel codice in inglese.
 
 ## 4. Standard di qualità
@@ -66,3 +71,6 @@
   collegati in modalità TCP server (change 0003, spec approvata).
 - 2026-10-03 — § 6: la fedeltà è al formato definito nella spec (`spec.md` § 6), unico riferimento per il tracciato
   delle stringhe; il testo è stato allineato anche nella storia del repository (change 0004).
+- 2026-10-20 — § 3: eccezione per gli aggiornamenti di versione proposti da Dependabot (solo `package.json` e
+  `package-lock.json`, nessuna versione maggiore, tutti i controlli della CI obbligatori, merge dell'autore), verificata
+  da `check:flow` (change 0005).

@@ -123,6 +123,10 @@ Each `test-results.md` also records the defects found along the way and the time
 earlier document — the parts that usually stay invisible. `npm run check:flow` (also in CI) verifies that every change
 has its six documents and that their statuses respect the order.
 
+One narrow exception keeps dependencies safe without paperwork: Dependabot pull requests that only bump versions of
+existing dependencies (no major versions, no other files) skip the change documents but still have to pass every other
+check — see [change 0005](changes/0005-aggiornamenti-dipendenze/intent.md).
+
 ## Testing & CI
 
 - **80+ automated tests** with `node:test`: unit tests plus end-to-end tests on real server instances (random ports,

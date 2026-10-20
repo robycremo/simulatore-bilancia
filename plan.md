@@ -48,7 +48,8 @@
 | `client/src/hooks/useEngine.js` | Frontend | WebSocket con riconnessione, token, errori, invii del carico limitati |
 | `client/src/components/*` | Frontend | display, comandi, pannelli, setup, `ErrorBoundary`, `Toast`, `TokenPrompt` |
 | `test/*.test.js` | CI | unitari ed end-to-end su istanze reali (`createApp`) |
-| `scripts/check-flow.mjs` | CI | struttura e stati delle change |
+| `scripts/check-flow.mjs` | CI | struttura e stati delle change; nelle PR, codice modificato solo con una change, salvo l'eccezione per Dependabot |
+| `scripts/dependabot-exemption.mjs` | CI | condizioni dell'eccezione per Dependabot (funzioni pure: autore, file, versioni, versioni maggiori) |
 | `scripts/check-public.mjs` | CI, Security | contenuti pubblicabili: IP solo di loopback o di documentazione (RFC 5737), nessun rimando al documento d'origine del formato, elenco locale dei valori riservati (`scripts/public-check.local.txt`, ignorato da git) |
 
 ## Fasi del ciclo
@@ -75,3 +76,4 @@
 | [0002-allineamento-stack](changes/0002-allineamento-stack/test-results.md) | completato |
 | [0003-modalita-server-tcp](changes/0003-modalita-server-tcp/test-results.md) | completato |
 | [0004-pubblicazione-open-source](changes/0004-pubblicazione-open-source/test-results.md) | completato |
+| [0005-aggiornamenti-dipendenze](changes/0005-aggiornamenti-dipendenze/intent.md) | bozza (intent) |
