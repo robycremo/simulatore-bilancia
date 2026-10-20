@@ -1,6 +1,6 @@
 # 0005 — Aggiornamenti automatici delle dipendenze · Spec
 
-> Stato: approvato
+> Stato: completato
 
 Deriva da [intent.md](intent.md). Descrive solo il comportamento osservabile. Il simulatore non cambia.
 
@@ -100,3 +100,4 @@ La costituzione § 3 riceve una nuova regola, con voce negli *Emendamenti*:
 - 2026-10-20 — **ritorno alla spec** durante il plan (stessa causa, conferma dell'utente): criteri del caso reale
   sostituiti da "correzione di sicurezza nella change" e da un test che riproduce la PR #3; prova dal vivo alla prima PR
   di Dependabot successiva, fuori dai criteri di chiusura.
+- 2026-10-20 — change chiusa su conferma dell'utente (T11).
