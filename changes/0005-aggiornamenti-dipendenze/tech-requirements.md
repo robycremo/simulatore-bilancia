@@ -1,6 +1,6 @@
 # 0005 — Aggiornamenti automatici delle dipendenze · Requisiti tecnici
 
-> Stato: approvato
+> Stato: completato
 
 Vincoli tecnici misurabili. Derivano da [spec.md](spec.md) e dalla [costituzione](../../constitution.md).
 
@@ -79,3 +79,4 @@ introduce merge automatici.
 - 2026-10-20 — approvati dall'utente.
 - 2026-10-20 — TR-15 e TR-16 riscritti dopo il ritorno a intent e spec: la correzione di sicurezza entra nella change
   (le due PR si sarebbero bloccate a vicenda per l'audit già fallito su `main`).
+- 2026-10-20 — change chiusa su conferma dell'utente (T11).

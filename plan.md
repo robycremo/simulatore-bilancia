@@ -76,4 +76,4 @@
 | [0002-allineamento-stack](changes/0002-allineamento-stack/test-results.md) | completato |
 | [0003-modalita-server-tcp](changes/0003-modalita-server-tcp/test-results.md) | completato |
 | [0004-pubblicazione-open-source](changes/0004-pubblicazione-open-source/test-results.md) | completato |
-| [0005-aggiornamenti-dipendenze](changes/0005-aggiornamenti-dipendenze/intent.md) | bozza (intent) |
+| [0005-aggiornamenti-dipendenze](changes/0005-aggiornamenti-dipendenze/test-results.md) | completato |

@@ -1,6 +1,6 @@
 # 0005 — Aggiornamenti automatici delle dipendenze · Intent
 
-> Stato: approvato
+> Stato: completato
 
 ## Work item
 
@@ -64,3 +64,4 @@ La correzione di sicurezza della PR #3 viene integrata insieme alla regola, nell
 - 2026-10-20 — **ritorno all'intent** durante il plan: `npm audit` su `main` fallisce già, quindi la PR della 0005 e la
   PR #3 si bloccherebbero a vicenda. Su conferma dell'utente la correzione di sicurezza entra nella 0005; la PR #3 non è
   più il primo caso di verifica.
+- 2026-10-20 — change chiusa su conferma dell'utente (T11).

@@ -1,6 +1,6 @@
 # 0005 — Aggiornamenti automatici delle dipendenze · Plan
 
-> Stato: approvato
+> Stato: completato
 
 Deriva da [spec.md](spec.md) e [tech-requirements.md](tech-requirements.md).
 Verificato prima di scrivere: sulla PR #3 GitHub registra `user.login = dependabot[bot]` (`type = Bot`), con il ramo
@@ -93,3 +93,4 @@ test/checkFlow.test.js             NUOVO   check-flow su repository git temporan
 - 2026-10-20 — aggiornato su conferma dell'utente: correzione di sicurezza nella change (passo 5), nuovo ordine di
   rilascio (passo 6), verifica e rischi allineati.
 - 2026-10-20 — approvato dall'utente.
+- 2026-10-20 — change chiusa su conferma dell'utente (T11).

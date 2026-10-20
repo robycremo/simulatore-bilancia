@@ -1,6 +1,6 @@
 # 0005 — Aggiornamenti automatici delle dipendenze · Tasks
 
-> Stato: in corso
+> Stato: completato
 
 Deriva da [plan.md](plan.md). Ordine di esecuzione; ogni task si chiude con la sua verifica. Tra parentesi i requisiti
 tecnici coperti. Si lavora sul ramo `0005-aggiornamenti-dipendenze`.
@@ -35,11 +35,11 @@ tecnici coperti. Si lavora sul ramo `0005-aggiornamenti-dipendenze`.
 
 ## Rilascio
 
-- [ ] **T9. PR della 0005.** Commit con email anonima, push del ramo, PR con il modello, CI verde in tutti i passi
+- [x] **T9. PR della 0005.** Commit con email anonima, push del ramo, PR con il modello, CI verde in tutti i passi
       compreso `npm audit`, merge da GitHub (TR-16).
-- [ ] **T10. Verifica dopo il merge.** Avviso su `shell-quote` `fixed`, CI su `main` verde, PR #3 chiusa da Dependabot
+- [x] **T10. Verifica dopo il merge.** Avviso su `shell-quote` `fixed`, CI su `main` verde, PR #3 chiusa da Dependabot
       (altrimenti chiusa con un commento che rimanda alla 0005) (TR-16).
-- [ ] **T11. Chiusura.** test-results completato, documenti a `completato`, PR di chiusura.
+- [x] **T11. Chiusura.** test-results completato, documenti a `completato`, PR di chiusura.
 - Dopo la chiusura, fuori dalla change: alla prima PR di Dependabot, lettura del log del passo del percorso e
   segnalazione all'utente.
 
@@ -58,3 +58,4 @@ tecnici coperti. Si lavora sul ramo `0005-aggiornamenti-dipendenze`.
 - 2026-10-20 — creata vuota, in attesa del documento precedente.
 - 2026-10-20 — scritti dopo l'approvazione del plan.
 - 2026-10-20 — approvati dall'utente; inizio da T1.
+- 2026-10-20 — change chiusa su conferma dell'utente (T11).
