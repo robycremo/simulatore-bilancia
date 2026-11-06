@@ -118,6 +118,7 @@ The full history is in [`changes/`](changes/README.md):
 | [0002 — production stack](changes/0002-allineamento-stack/intent.md) | each of the 13 stack layers covered or explicitly ruled out: auth, validation, rate limiting, atomic storage, logs, health, CI |
 | [0003 — TCP server mode](changes/0003-modalita-server-tcp/intent.md) | channels that listen for clients such as PuTTY, with IP allow-list |
 | [0004 — open-source release](changes/0004-pubblicazione-open-source/intent.md) | this public repository: licensing, security settings, documentation |
+| [0005 — automatic dependency updates](changes/0005-aggiornamenti-dipendenze/intent.md) | the narrow, automatically checked exception for Dependabot pull requests described below |
 
 Each `test-results.md` also records the defects found along the way and the times the process went back to an
 earlier document — the parts that usually stay invisible. `npm run check:flow` (also in CI) verifies that every change
@@ -129,11 +130,15 @@ check — see [change 0005](changes/0005-aggiornamenti-dipendenze/intent.md).
 
 ## Testing & CI
 
-- **80+ automated tests** with `node:test`: unit tests plus end-to-end tests on real server instances (random ports,
+- **100+ automated tests** with `node:test`: unit tests plus end-to-end tests on real server instances (random ports,
   temporary data folders) covering the weighing cycle, ACK/NAK, access control, rate limiting, storage recovery and
   TCP server mode.
 - **GitHub Actions** on every push and pull request: process check, publishable-content check, build, tests and
   `npm audit` (fails on high-severity vulnerabilities).
+- **Dependabot** opens grouped weekly pull requests for npm (minor and patch together) and monthly ones for GitHub
+  Actions (`.github/dependabot.yml`); they go through the exception above. Major-version bumps are outside the
+  exception and need their own change.
+- Issues and pull requests start from templates (bug report, change request, PR checklist).
 
 ## Security
 

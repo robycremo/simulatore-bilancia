@@ -151,6 +151,9 @@ I documenti vivi sono [intent.md](intent.md), [spec.md](spec.md), [tech-requirem
 `npm run check:flow` (eseguito anche in CI) verifica che il percorso sia rispettato. Unica eccezione: le PR di
 Dependabot che aggiornano solo le versioni di dipendenze esistenti, senza versioni maggiori, non richiedono una change
 ma devono superare tutti gli altri controlli ([change 0005](changes/0005-aggiornamenti-dipendenze/intent.md)).
+Dependabot apre ogni settimana una PR raggruppata per gli aggiornamenti npm minori e di patch, e ogni mese una per le
+GitHub Actions (`.github/dependabot.yml`); gli aggiornamenti di versione maggiore restano fuori dall'eccezione e
+richiedono una change. Issue e PR partono dai modelli (segnalazione di bug, richiesta di modifica, checklist della PR).
 
 | Comando | Effetto |
 |---|---|
