@@ -1,0 +1,33 @@
+name: ✨ Richiesta di modifica
+description: Nuova funzione o modifica a un comportamento esistente
+labels: [enhancement]
+body:
+  - type: textarea
+    id: perche
+    attributes:
+      label: Perché serve
+      description: Il problema o l'esigenza di business, non ancora la soluzione.
+    validations:
+      required: true
+  - type: textarea
+    id: cosa
+    attributes:
+      label: Cosa vorresti
+      description: Comportamento desiderato, dal punto di vista di chi lo usa.
+    validations:
+      required: true
+  - type: textarea
+    id: criteri
+    attributes:
+      label: Come capiamo che è fatto
+      description: Criteri di accettazione verificabili.
+      placeholder: |
+        - [ ] …
+  - type: checkboxes
+    id: impatti
+    attributes:
+      label: Impatti
+      options:
+        - label: Tocca il database (schema o dati)
+        - label: Tocca sistemi in produzione (impianto, ERP, MES, stampanti, bilance)
+        - label: Cambia formati scambiati con altri sistemi (file, tracciati, API)
