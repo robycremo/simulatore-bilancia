@@ -40,14 +40,14 @@
     "check:public": "node scripts/check-public.mjs"
   },
   "dependencies": {
-    "express": "^5.1.0",
-    "ws": "^8.18.0"
+    "express": "^5.3.0",
+    "ws": "^8.22.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.0",
     "concurrently": "^9.2.5",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "vite": "^7.1.0"
   }
 }
